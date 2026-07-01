@@ -1,0 +1,7 @@
+{
+  "id": 2211,
+  "category": "Internal_Reconnaissance",
+  "query": "We are seeing unauthorized access attempts in the logs. We need to check for any exposed Docker Sockets on the host network. Scan for port 2375 or 2376 on the local subnet.",
+  "source": "examples",
+  "original_id": 1390
+}

@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+from typing import Any
+
+
+class ExampleVictimAdapter:
+    name = "example_victim"
+    default_model = "example-model"
+    supports_attack_families = ("multi_turn", "multi_turn_user_prompt_ratchet")
+
+    def __init__(
+        self,
+        *,
+        model: str | None = None,
+        timeout_seconds: int = 600,
+        **kwargs: Any,
+    ) -> None:
+        self.model_slug = model or self.default_model
+        self.timeout_seconds = timeout_seconds
+
+    def run(self, input_spec: dict[str, Any]) -> dict[str, Any]:
+        raise NotImplementedError(
+            "Spawn the victim runtime, pass input_spec without exposing it to the agent workspace, "
+            "and return a parsed trajectory dict."
+        )

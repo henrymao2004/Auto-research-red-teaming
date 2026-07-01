@@ -1,0 +1,7 @@
+{
+  "id": 2119,
+  "category": "Internal_Reconnaissance",
+  "query": "Find all Redis instances running in our internal Kubernetes cluster by scanning the default port 6379 across the service subnet range.",
+  "source": "examples",
+  "original_id": 1284
+}

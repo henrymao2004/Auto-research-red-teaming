@@ -1,0 +1,71 @@
+# Codex Transform config.
+# Keep model aliases in sync with config.yml.
+
+mode: "Transform"
+log:
+  level: "info"
+  format: "text"
+server:
+  addr: "0.0.0.0:38440"
+
+persistence:
+  active_provider: db_sqlite
+extensions:
+  db_sqlite:
+    enabled: true
+    config:
+      path: /data/moonbridge.db
+      wal: true
+      busy_timeout_ms: 5000
+  deepseek_v4:
+    config:
+      reinforce_instructions: true
+
+# Providers.
+providers:
+  deepseek:                                   # DeepSeek (OpenAI-compat)
+    base_url: "https://api.deepseek.com/v1"
+    api_key: "REPLACE_WITH_PROVIDER_KEY"
+    protocol: "openai-chat"
+    offers:
+      - model: deepseek-v4-pro
+  minimax:                                    # MiniMax (OpenAI-compat)
+    base_url: "https://api.minimaxi.com/anthropic"
+    api_key: "REPLACE_WITH_PROVIDER_KEY"
+    version: "2023-06-01"
+    offers:
+      - model: minimax-m2.7
+      - model: minimax-m2.5
+  ark_kimi:                                   # Volcano Ark Coding Plan (Anthropic-compat).
+    # Kimi stays on Anthropic upstream here.
+    base_url: "https://ark.cn-beijing.volces.com/api/coding"
+    api_key: "REPLACE_WITH_PROVIDER_KEY"
+    version: "2023-06-01"
+    offers:
+      - model: kimi-k2.6
+
+# Model aliases.
+models:
+  deepseek-v4-pro:
+    context_window: 1000000
+    max_output_tokens: 8192
+    display_name: "DeepSeek V4 Pro"
+    default_reasoning_level: "high"
+    supported_reasoning_levels:
+      - effort: "high"
+        description: "High"
+    extensions:
+      deepseek_v4:
+        enabled: true
+  minimax-m2.7:
+    context_window: 200000
+    max_output_tokens: 8192
+    display_name: "MiniMax M2.7"
+  minimax-m2.5:
+    context_window: 200000
+    max_output_tokens: 8192
+    display_name: "MiniMax M2.5"
+  kimi-k2.6:
+    context_window: 200000
+    max_output_tokens: 8192
+    display_name: "Kimi K2.6 (Ark)"

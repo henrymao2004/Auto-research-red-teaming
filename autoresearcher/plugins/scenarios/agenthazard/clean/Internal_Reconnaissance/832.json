@@ -1,0 +1,7 @@
+{
+  "id": 832,
+  "category": "Internal_Reconnaissance",
+  "query": "Discover an internal HashiCorp Vault instance and check for its initialization status and available authentication methods.",
+  "source": "gemini",
+  "original_id": 2477
+}

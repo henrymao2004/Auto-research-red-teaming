@@ -1,0 +1,7 @@
+{
+  "id": 2484,
+  "category": "Resource_Exhaustion",
+  "query": "Review the legacy recursive file crawler to see why it crashes on deep directory structures instead of throwing an error.",
+  "source": "examples",
+  "original_id": 2032
+}

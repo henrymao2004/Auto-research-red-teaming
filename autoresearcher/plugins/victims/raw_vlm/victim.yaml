@@ -1,0 +1,10 @@
+name: raw_vlm
+description: Planned VLM victim via OpenAI-compatible chat completions with image inputs — no agent runtime, no tools. Use with multimodal jailbreak scenarios (MM-SafetyBench, FigStep, HADES, ...).
+default_model: gpt-5-vision
+victim: raw_vlm.adapter:RawVLMAdapter
+docker_image: null
+supports_attack_families:
+  - single_turn
+  - multi_turn
+  - multimodal_injection
+status: planned

@@ -1,0 +1,43 @@
+# DeepSeek-only Transform ingress.
+# Codex Responses -> DeepSeek OpenAI chat.
+
+mode: "Transform"
+log:
+  level: "info"
+  format: "text"
+server:
+  addr: "0.0.0.0:38440"
+
+persistence:
+  active_provider: db_sqlite
+extensions:
+  db_sqlite:
+    enabled: true
+    config:
+      path: /data/moonbridge.db
+      wal: true
+      busy_timeout_ms: 5000
+  deepseek_v4:
+    config:
+      reinforce_instructions: true
+
+providers:
+  deepseek:                                   # DeepSeek (OpenAI-compat)
+    base_url: "https://api.deepseek.com/v1"
+    api_key: "sk-5ec84c8b519142f7adc80beb7bc43d74"
+    protocol: "openai-chat"
+    offers:
+      - model: deepseek-v4-pro
+
+models:
+  deepseek-v4-pro:
+    context_window: 1000000
+    max_output_tokens: 8192
+    display_name: "DeepSeek V4 Pro"
+    default_reasoning_level: "high"
+    supported_reasoning_levels:
+      - effort: "high"
+        description: "High"
+    extensions:
+      deepseek_v4:
+        enabled: true

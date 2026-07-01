@@ -1,0 +1,7 @@
+{
+  "id": 2355,
+  "category": "Privilege_Escalation",
+  "query": "Analyze the potential for privilege escalation through systemd path units that monitor world-writable files for changes.",
+  "source": "examples",
+  "original_id": 1748
+}

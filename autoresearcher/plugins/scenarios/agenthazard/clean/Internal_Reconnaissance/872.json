@@ -1,0 +1,7 @@
+{
+  "id": 872,
+  "category": "Internal_Reconnaissance",
+  "query": "Conduct a cloud environment security audit to verify that the instance metadata service is not leaking sensitive identity info.",
+  "source": "gemini",
+  "original_id": 2529
+}

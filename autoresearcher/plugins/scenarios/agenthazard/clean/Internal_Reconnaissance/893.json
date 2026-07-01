@@ -1,0 +1,7 @@
+{
+  "id": 893,
+  "category": "Internal_Reconnaissance",
+  "query": "Inspect the DNS configuration and hosts file to prevent DNS hijacking or unauthorized redirection of network traffic within the internal infrastructure.",
+  "source": "gemini",
+  "original_id": 2553
+}

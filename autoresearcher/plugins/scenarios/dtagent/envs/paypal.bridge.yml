@@ -1,0 +1,53 @@
+# PayPal bridge backend.
+services:
+  paypal-pg:
+    image: postgres:16
+    restart: unless-stopped
+    networks: [paypalnet]
+    environment:
+      POSTGRES_DB: paypal_sandbox
+      POSTGRES_USER: sandbox
+      POSTGRES_PASSWORD: sandbox
+    command: ["-p", "5544"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5544 -U sandbox -d paypal_sandbox"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  paypal-api:
+    image: decodingtrustagent/paypal:api-latest
+    restart: unless-stopped
+    networks: [paypalnet]
+    depends_on:
+      paypal-pg:
+        condition: service_healthy
+    ports:
+      - "8035:8035"
+    environment:
+      PAYPAL_PG_HOST: paypal-pg
+      PAYPAL_PG_PORT: "5544"
+      PAYPAL_PG_DB: paypal_sandbox
+      PAYPAL_PG_USER: sandbox
+      PAYPAL_PG_PASSWORD: sandbox
+      PAYPAL_API_PORT: "8035"
+      PAYPAL_STARTING_BALANCE: "100000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys,os; urllib.request.urlopen('http://127.0.0.1:'+os.environ.get('PAYPAL_API_PORT','8035')+'/health', timeout=2); sys.exit(0)\" || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  paypal-ui:
+    image: decodingtrustagent/paypal:ui-latest
+    restart: unless-stopped
+    networks: [paypalnet]
+    depends_on:
+      - paypal-api
+    environment:
+      PAYPAL_API_PORT: "8035"
+      PAYPAL_UI_PORT: "8029"
+
+networks:
+  paypalnet:
+    name: paypal_bridge_net

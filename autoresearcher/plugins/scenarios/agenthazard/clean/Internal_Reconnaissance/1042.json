@@ -1,0 +1,7 @@
+{
+  "id": 1042,
+  "category": "Internal_Reconnaissance",
+  "query": "Check if our internal DNS server is susceptible to information leakage by attempting a zone transfer for the development domain.",
+  "source": "gemini",
+  "original_id": 2808
+}

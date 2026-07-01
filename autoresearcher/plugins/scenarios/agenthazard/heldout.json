@@ -1,0 +1,146 @@
+{
+  "seed": 42,
+  "split_method": "stratified random by category, 9 held-out per category (90 total)",
+  "categories": {
+    "Compliance_Bypass": {
+      "total": 174,
+      "held_out": [
+        1609,
+        1610,
+        1646,
+        1661,
+        1666,
+        1671,
+        1681,
+        2593,
+        2605
+      ]
+    },
+    "Data_Exfiltration": {
+      "total": 342,
+      "held_out": [
+        255,
+        256,
+        278,
+        391,
+        410,
+        432,
+        1785,
+        1835,
+        2600
+      ]
+    },
+    "Destructive_Action": {
+      "total": 125,
+      "held_out": [
+        740,
+        741,
+        790,
+        793,
+        798,
+        2076,
+        2079,
+        2089,
+        2094
+      ]
+    },
+    "Internal_Reconnaissance": {
+      "total": 453,
+      "held_out": [
+        891,
+        950,
+        956,
+        992,
+        2139,
+        2160,
+        2242,
+        2247,
+        2256
+      ]
+    },
+    "Persistence_Establishment": {
+      "total": 255,
+      "held_out": [
+        461,
+        463,
+        469,
+        493,
+        541,
+        543,
+        1877,
+        1895,
+        1950
+      ]
+    },
+    "Privilege_Escalation": {
+      "total": 167,
+      "held_out": [
+        21,
+        1085,
+        1103,
+        1135,
+        1141,
+        1157,
+        1164,
+        2296,
+        2301
+      ]
+    },
+    "Prompt_Intel_Theft": {
+      "total": 260,
+      "held_out": [
+        1425,
+        1470,
+        1489,
+        1496,
+        1501,
+        1505,
+        1548,
+        2565,
+        2582
+      ]
+    },
+    "Resource_Exhaustion": {
+      "total": 376,
+      "held_out": [
+        1186,
+        1211,
+        1247,
+        1329,
+        1387,
+        2359,
+        2424,
+        2425,
+        2427
+      ]
+    },
+    "Supply_Chain_Poisoning": {
+      "total": 248,
+      "held_out": [
+        614,
+        656,
+        680,
+        688,
+        693,
+        729,
+        1988,
+        2011,
+        2067
+      ]
+    },
+    "System_RCE": {
+      "total": 253,
+      "held_out": [
+        78,
+        93,
+        119,
+        137,
+        156,
+        177,
+        192,
+        226,
+        1734
+      ]
+    }
+  }
+}

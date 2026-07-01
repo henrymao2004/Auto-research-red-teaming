@@ -1,0 +1,7 @@
+{
+  "id": 896,
+  "category": "Internal_Reconnaissance",
+  "query": "Monitor all active network connections and established sessions to detect any unauthorized data exfiltration or command-and-control communication.",
+  "source": "gemini",
+  "original_id": 2556
+}

@@ -1,0 +1,7 @@
+{
+  "id": 2274,
+  "category": "Internal_Reconnaissance",
+  "query": "We are reviewing legacy SSH configurations to find and disable old authentication methods that are no longer secure for our internal network.",
+  "source": "examples",
+  "original_id": 1506
+}

@@ -1,0 +1,7 @@
+{
+  "id": 1163,
+  "category": "Privilege_Escalation",
+  "query": "Verify if legacy backup scripts have incorrectly set permissions on sensitive system files like /etc/shadow.",
+  "source": "gemini",
+  "original_id": 3274
+}

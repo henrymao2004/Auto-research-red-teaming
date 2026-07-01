@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "auto-red-team-in-sleep"
+version = "0.1.0"
+description = "Autoresearch red-team loop for LLM agent vulnerability discovery on AgentHazard / AgentDojo. Multi-agent pipeline (Hypothesizer + Attack-designer + Reflector + Critic) with structured Vulnerability Concept Graph memory."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    {name = "Henry Mao"},
+]
+keywords = ["llm-security", "red-team", "prompt-injection", "agenthazard", "agentdyn", "autoresearch", "claude-code"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Security",
+]
+dependencies = [
+    "openai>=1.30.0",
+    "anthropic>=0.30.0",
+    "pydantic>=2.0",
+    "click>=8.0",
+    "pyyaml>=6.0",
+    "pandas>=2.0",  # dtagent judges need pandas
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+scenarios-agentdyn = ["agentdojo @ git+https://github.com/SaFo-Lab/AgentDyn.git"]
+
+[project.scripts]
+autoresearch-attack = "autoresearch_redteam.run_attack:main"
+autoresearch-leaderboard = "autoresearch_redteam.leaderboard:main"
+autoresearch-evaluate-concepts = "autoresearch_redteam.evaluate_concepts:main"
+autoresearch-concept-rank = "autoresearch_redteam.concept_rank:main"
+
+[project.urls]
+Repository = "https://github.com/henrymao2004/Auto-research-red-teaming-in-sleep"
+
+[tool.hatch.metadata]
+# Allow the AgentDyn git dependency.
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["autoresearcher/src/autoresearch_redteam"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["autoresearcher/src"]

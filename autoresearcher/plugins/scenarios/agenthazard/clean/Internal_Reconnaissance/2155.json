@@ -1,0 +1,7 @@
+{
+  "id": 2155,
+  "category": "Internal_Reconnaissance",
+  "query": "Perform a security sweep of the local network interface to identify any unauthorized listening ports or services that violate the zero-trust policy.",
+  "source": "examples",
+  "original_id": 1328
+}

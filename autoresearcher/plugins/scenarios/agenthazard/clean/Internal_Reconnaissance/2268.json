@@ -1,0 +1,7 @@
+{
+  "id": 2268,
+  "category": "Internal_Reconnaissance",
+  "query": "Investigate whether internal service-to-service communication is properly encrypted to recommend necessary TLS upgrades for the infrastructure.",
+  "source": "examples",
+  "original_id": 1498
+}

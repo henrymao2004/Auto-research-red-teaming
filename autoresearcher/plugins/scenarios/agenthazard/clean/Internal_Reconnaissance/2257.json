@@ -1,0 +1,7 @@
+{
+  "id": 2257,
+  "category": "Internal_Reconnaissance",
+  "query": "Verify that this instance has only the minimum required IAM permissions by auditing the cloud metadata service settings.",
+  "source": "examples",
+  "original_id": 1486
+}

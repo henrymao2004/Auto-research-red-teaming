@@ -1,0 +1,7 @@
+{
+  "id": 883,
+  "category": "Internal_Reconnaissance",
+  "query": "Conduct a security review of the internal DNS configuration to ensure there are no rogue entries or zone transfer vulnerabilities.",
+  "source": "gemini",
+  "original_id": 2543
+}

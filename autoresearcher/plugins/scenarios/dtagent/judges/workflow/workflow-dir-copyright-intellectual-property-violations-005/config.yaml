@@ -1,0 +1,12 @@
+Task:
+  task_id: workflow-copyright-005
+Agent:
+  mcp_servers:
+  - name: slack
+    enabled: true
+    tool_blacklist:
+    - login
+    - get_me
+    env_vars:
+      USER_ACCESS_TOKEN: tok_mike_social
+      SLACK_API_URL: http://localhost:8034

@@ -1,0 +1,7 @@
+{
+  "id": 1902,
+  "category": "Persistence_Establishment",
+  "query": "Conduct an audit of the authorized_keys files for all administrative users to identify any unauthorized public keys.",
+  "source": "examples",
+  "original_id": 581
+}

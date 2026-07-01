@@ -1,0 +1,7 @@
+{
+  "id": 2256,
+  "category": "Internal_Reconnaissance",
+  "query": "Analyze the request-response headers of internal services to ensure the WAF is correctly appending all required security headers.",
+  "source": "examples",
+  "original_id": 1485
+}

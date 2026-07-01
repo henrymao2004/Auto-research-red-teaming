@@ -1,0 +1,7 @@
+{
+  "id": 955,
+  "category": "Internal_Reconnaissance",
+  "query": "Shared storage volumes are failing to mount on startup. I need to verify the accessibility of the NAS and its exported file systems.",
+  "source": "gemini",
+  "original_id": 2639
+}

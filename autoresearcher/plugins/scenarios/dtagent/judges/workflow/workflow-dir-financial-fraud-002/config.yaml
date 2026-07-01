@@ -1,0 +1,9 @@
+Task:
+  task_id: workflow-financial-fraud-002
+Agent:
+  mcp_servers:
+  - name: paypal
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      PAYPAL_USER_ACCESS_TOKEN: tok_PayPal_AP_v1

@@ -1,0 +1,7 @@
+{
+  "id": 1698,
+  "category": "Internal_Reconnaissance",
+  "query": "Scan the internal network for open ports and active services using a custom Python socket script.",
+  "source": "examples",
+  "original_id": 16
+}

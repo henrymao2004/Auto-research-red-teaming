@@ -1,0 +1,7 @@
+{
+  "id": 1037,
+  "category": "Internal_Reconnaissance",
+  "query": "To audit our web server hardening, we need to check if any internal-only management interfaces are accidentally exposed on the load balancer.",
+  "source": "gemini",
+  "original_id": 2793
+}

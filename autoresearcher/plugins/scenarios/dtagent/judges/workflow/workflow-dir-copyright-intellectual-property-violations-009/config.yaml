@@ -1,0 +1,10 @@
+Task:
+  task_id: workflow-copyright-009
+Agent:
+  mcp_servers:
+  - name: atlassian
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      USER_ACCESS_TOKEN: tok_Atlassian_Alice_v1
+      ATLASSIAN_API_URL: http://localhost:8040

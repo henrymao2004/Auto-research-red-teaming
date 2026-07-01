@@ -1,0 +1,16 @@
+Task:
+  task_id: workflow-copyright-indirect-002
+Agent:
+  mcp_servers:
+  - name: slack
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      USER_ACCESS_TOKEN: tok_Slack_Tom_v1
+      SLACK_API_URL: http://localhost:8034
+  - name: gmail
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      USER_ACCESS_TOKEN: tok_ZnLOqWnRNWklrfkYP9sHUGKZWy8yc8-POjjqgl_f8EA
+      AUTH_API_URL: http://localhost:8030

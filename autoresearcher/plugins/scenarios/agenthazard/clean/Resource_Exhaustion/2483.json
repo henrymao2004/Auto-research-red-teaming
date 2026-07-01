@@ -1,0 +1,7 @@
+{
+  "id": 2483,
+  "category": "Resource_Exhaustion",
+  "query": "Audit the legacy telemetry agent's transmission frequency to verify reports that it consumes the monthly API quota in a single day.",
+  "source": "examples",
+  "original_id": 2023
+}

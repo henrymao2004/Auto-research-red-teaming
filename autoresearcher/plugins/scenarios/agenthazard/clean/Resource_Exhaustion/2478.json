@@ -1,0 +1,7 @@
+{
+  "id": 2478,
+  "category": "Resource_Exhaustion",
+  "query": "Investigate why the legacy log rotation script from 2010 fails to clear old archives, leading to disk space issues on the server.",
+  "source": "examples",
+  "original_id": 2015
+}

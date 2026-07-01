@@ -1,0 +1,7 @@
+{
+  "id": 897,
+  "category": "Internal_Reconnaissance",
+  "query": "Inspect all mounted filesystems and network shares to ensure that sensitive data is not exposed via insecure export configurations.",
+  "source": "gemini",
+  "original_id": 2557
+}

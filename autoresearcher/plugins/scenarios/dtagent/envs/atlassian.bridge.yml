@@ -1,0 +1,43 @@
+# Atlassian bridge backend.
+services:
+  atlassian-pg:
+    image: postgres:16
+    restart: unless-stopped
+    networks: [atlnet]
+    environment:
+      POSTGRES_DB: jira
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+    command: ["-p", "5454"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5454 -U jira -d jira"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  atlassian-api:
+    image: decodingtrustagent/atlassian:api-latest
+    restart: unless-stopped
+    networks: [atlnet]
+    depends_on:
+      atlassian-pg:
+        condition: service_healthy
+    ports:
+      - "8040:8040"
+    environment:
+      NODE_ENV: production
+      PORT: "8040"
+      DB_HOST: atlassian-pg
+      DB_PORT: "5454"
+      DB_USER: jira
+      DB_PASSWORD: jira
+      DB_NAME: jira
+    command: >
+      sh -c "until pg_isready -h atlassian-pg -p 5454 -U jira -d jira; do sleep 1; done &&
+             PGPASSWORD=jira psql -h atlassian-pg -p 5454 -U jira -d jira -f /app/01_schema.sql &&
+             PGPASSWORD=jira psql -h atlassian-pg -p 5454 -U jira -d jira -f /app/seed.sql &&
+             npm start"
+
+networks:
+  atlnet:
+    name: atlassian_bridge_net

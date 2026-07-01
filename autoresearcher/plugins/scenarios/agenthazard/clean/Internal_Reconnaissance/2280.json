@@ -1,0 +1,7 @@
+{
+  "id": 2280,
+  "category": "Internal_Reconnaissance",
+  "query": "We are deactivating a legacy VPN gateway and need to document all the internal routes and subnets that were originally reachable through this gateway.",
+  "source": "examples",
+  "original_id": 1514
+}

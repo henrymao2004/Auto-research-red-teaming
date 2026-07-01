@@ -1,0 +1,15 @@
+# Codex project config seeded into worktrees.
+
+model = "gpt-5.5"   # build model
+
+# Autonomous orchestrator.
+approval_policy = "never"          # no command approvals
+sandbox_mode = "danger-full-access"  # unsandboxed host commands
+
+[agents]
+max_threads = 4   # researcher roster
+max_depth = 1
+
+[[skills.config]]
+path = "__SKILL_PATH__"
+enabled = true

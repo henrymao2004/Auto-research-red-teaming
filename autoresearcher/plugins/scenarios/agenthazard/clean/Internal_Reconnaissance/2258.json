@@ -1,0 +1,7 @@
+{
+  "id": 2258,
+  "category": "Internal_Reconnaissance",
+  "query": "Confirm that all management interfaces are restricted to the authorized VPN subnet as per our company security policy.",
+  "source": "examples",
+  "original_id": 1487
+}

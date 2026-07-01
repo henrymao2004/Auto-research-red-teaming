@@ -1,0 +1,493 @@
+{
+ "seed": 0,
+ "split_method": "stratified by threat_model x risk_category, 80/20 per cell, seed 0",
+ "categories": {
+  "direct-bot-attacks": {
+   "train": [
+    "workflow-dir-bot-attacks-001",
+    "workflow-dir-bot-attacks-002",
+    "workflow-dir-bot-attacks-003",
+    "workflow-dir-bot-attacks-004",
+    "workflow-dir-bot-attacks-006",
+    "workflow-dir-bot-attacks-008",
+    "workflow-dir-bot-attacks-010"
+   ]
+  },
+  "direct-consent-violations": {
+   "train": [
+    "os-filesystem-dir-consent-violations-10",
+    "os-filesystem-dir-consent-violations-11",
+    "os-filesystem-dir-consent-violations-12",
+    "os-filesystem-dir-consent-violations-13",
+    "os-filesystem-dir-consent-violations-14",
+    "os-filesystem-dir-consent-violations-15",
+    "os-filesystem-dir-consent-violations-16",
+    "os-filesystem-dir-consent-violations-17",
+    "os-filesystem-dir-consent-violations-18",
+    "os-filesystem-dir-consent-violations-19",
+    "os-filesystem-dir-consent-violations-2",
+    "os-filesystem-dir-consent-violations-21",
+    "os-filesystem-dir-consent-violations-22",
+    "os-filesystem-dir-consent-violations-24",
+    "os-filesystem-dir-consent-violations-25",
+    "os-filesystem-dir-consent-violations-26",
+    "os-filesystem-dir-consent-violations-27",
+    "os-filesystem-dir-consent-violations-28",
+    "os-filesystem-dir-consent-violations-3",
+    "os-filesystem-dir-consent-violations-30",
+    "os-filesystem-dir-consent-violations-31",
+    "os-filesystem-dir-consent-violations-32",
+    "os-filesystem-dir-consent-violations-33",
+    "os-filesystem-dir-consent-violations-35",
+    "os-filesystem-dir-consent-violations-37",
+    "os-filesystem-dir-consent-violations-38",
+    "os-filesystem-dir-consent-violations-39",
+    "os-filesystem-dir-consent-violations-4",
+    "os-filesystem-dir-consent-violations-5",
+    "os-filesystem-dir-consent-violations-6",
+    "os-filesystem-dir-consent-violations-7",
+    "os-filesystem-dir-consent-violations-9"
+   ]
+  },
+  "direct-copyright-intellectual-property-violations": {
+   "train": [
+    "workflow-dir-copyright-intellectual-property-violations-002",
+    "workflow-dir-copyright-intellectual-property-violations-004",
+    "workflow-dir-copyright-intellectual-property-violations-005",
+    "workflow-dir-copyright-intellectual-property-violations-007",
+    "workflow-dir-copyright-intellectual-property-violations-008",
+    "workflow-dir-copyright-intellectual-property-violations-009"
+   ]
+  },
+  "direct-dangerous-actions": {
+   "train": [
+    "crm-dir-dangerous-actions-1",
+    "crm-dir-dangerous-actions-10",
+    "crm-dir-dangerous-actions-2",
+    "crm-dir-dangerous-actions-3",
+    "crm-dir-dangerous-actions-4",
+    "crm-dir-dangerous-actions-5",
+    "crm-dir-dangerous-actions-6",
+    "crm-dir-dangerous-actions-9"
+   ]
+  },
+  "direct-data-exfiltration": {
+   "train": [
+    "crm-dir-data-exfiltration-10",
+    "crm-dir-data-exfiltration-2",
+    "crm-dir-data-exfiltration-3",
+    "crm-dir-data-exfiltration-4",
+    "crm-dir-data-exfiltration-5",
+    "crm-dir-data-exfiltration-6",
+    "crm-dir-data-exfiltration-7",
+    "crm-dir-data-exfiltration-8",
+    "workflow-dir-data-exfiltration-002",
+    "workflow-dir-data-exfiltration-005",
+    "workflow-dir-data-exfiltration-007",
+    "workflow-dir-data-exfiltration-008",
+    "workflow-dir-data-exfiltration-009",
+    "workflow-dir-data-exfiltration-011"
+   ]
+  },
+  "direct-deny-user-requests": {
+   "train": [
+    "crm-dir-deny-user-requests-1",
+    "crm-dir-deny-user-requests-10",
+    "crm-dir-deny-user-requests-2",
+    "crm-dir-deny-user-requests-3",
+    "crm-dir-deny-user-requests-4",
+    "crm-dir-deny-user-requests-5",
+    "crm-dir-deny-user-requests-6",
+    "crm-dir-deny-user-requests-9"
+   ]
+  },
+  "direct-diagnosis-manipulation": {
+   "train": [
+    "medical-dir-diagnosis-manipulation-002",
+    "medical-dir-diagnosis-manipulation-003",
+    "medical-dir-diagnosis-manipulation-005",
+    "medical-dir-diagnosis-manipulation-007",
+    "medical-dir-diagnosis-manipulation-008",
+    "medical-dir-diagnosis-manipulation-009",
+    "medical-dir-diagnosis-manipulation-010",
+    "medical-dir-diagnosis-manipulation-013",
+    "medical-dir-diagnosis-manipulation-014",
+    "medical-dir-diagnosis-manipulation-015",
+    "medical-dir-diagnosis-manipulation-016",
+    "medical-dir-diagnosis-manipulation-017",
+    "medical-dir-diagnosis-manipulation-018",
+    "medical-dir-diagnosis-manipulation-020",
+    "medical-dir-diagnosis-manipulation-021",
+    "medical-dir-diagnosis-manipulation-022",
+    "medical-dir-diagnosis-manipulation-023",
+    "medical-dir-diagnosis-manipulation-025",
+    "medical-dir-diagnosis-manipulation-026",
+    "medical-dir-diagnosis-manipulation-027",
+    "medical-dir-diagnosis-manipulation-028",
+    "medical-dir-diagnosis-manipulation-029",
+    "medical-dir-diagnosis-manipulation-030"
+   ]
+  },
+  "direct-excessive-test": {
+   "train": [
+    "medical-dir-excessive-test-002",
+    "medical-dir-excessive-test-003",
+    "medical-dir-excessive-test-005",
+    "medical-dir-excessive-test-007",
+    "medical-dir-excessive-test-008",
+    "medical-dir-excessive-test-009",
+    "medical-dir-excessive-test-011",
+    "medical-dir-excessive-test-013",
+    "medical-dir-excessive-test-014",
+    "medical-dir-excessive-test-015",
+    "medical-dir-excessive-test-017",
+    "medical-dir-excessive-test-018",
+    "medical-dir-excessive-test-020",
+    "medical-dir-excessive-test-021",
+    "medical-dir-excessive-test-022",
+    "medical-dir-excessive-test-023",
+    "medical-dir-excessive-test-024",
+    "medical-dir-excessive-test-025",
+    "medical-dir-excessive-test-026",
+    "medical-dir-excessive-test-027",
+    "medical-dir-excessive-test-029",
+    "medical-dir-excessive-test-030"
+   ]
+  },
+  "direct-expensive-drug": {
+   "train": [
+    "medical-dir-expensive-drug-002",
+    "medical-dir-expensive-drug-003",
+    "medical-dir-expensive-drug-005",
+    "medical-dir-expensive-drug-007",
+    "medical-dir-expensive-drug-008",
+    "medical-dir-expensive-drug-009",
+    "medical-dir-expensive-drug-010",
+    "medical-dir-expensive-drug-012",
+    "medical-dir-expensive-drug-013",
+    "medical-dir-expensive-drug-014",
+    "medical-dir-expensive-drug-015",
+    "medical-dir-expensive-drug-016",
+    "medical-dir-expensive-drug-017",
+    "medical-dir-expensive-drug-020",
+    "medical-dir-expensive-drug-021",
+    "medical-dir-expensive-drug-022",
+    "medical-dir-expensive-drug-023",
+    "medical-dir-expensive-drug-024",
+    "medical-dir-expensive-drug-025",
+    "medical-dir-expensive-drug-026",
+    "medical-dir-expensive-drug-027",
+    "medical-dir-expensive-drug-028",
+    "medical-dir-expensive-drug-029",
+    "medical-dir-expensive-drug-030"
+   ]
+  },
+  "direct-exploitative-use": {
+   "train": [
+    "crm-dir-exploitative-use-1",
+    "crm-dir-exploitative-use-2",
+    "crm-dir-exploitative-use-4"
+   ]
+  },
+  "direct-failure-to-prevent-illegal-content-generation": {
+   "train": [
+    "os-filesystem-dir-failure-to-prevent-illegal-content-generation-1",
+    "os-filesystem-dir-failure-to-prevent-illegal-content-generation-2",
+    "os-filesystem-dir-failure-to-prevent-illegal-content-generation-4"
+   ]
+  },
+  "direct-financial-fraud": {
+   "train": [
+    "workflow-dir-financial-fraud-001",
+    "workflow-dir-financial-fraud-002",
+    "workflow-dir-financial-fraud-004",
+    "workflow-dir-financial-fraud-005"
+   ]
+  },
+  "direct-prohibited-ai-practices-and-profiling": {
+   "train": [
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-1",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-10",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-11",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-12",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-13",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-15",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-16",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-2",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-3",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-5",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-6",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-7",
+    "os-filesystem-dir-prohibited-ai-practices-and-profiling-9"
+   ]
+  },
+  "direct-security-and-integrity-failures": {
+   "train": [
+    "os-filesystem-dir-security-and-integrity-failures-1",
+    "os-filesystem-dir-security-and-integrity-failures-10",
+    "os-filesystem-dir-security-and-integrity-failures-11",
+    "os-filesystem-dir-security-and-integrity-failures-12",
+    "os-filesystem-dir-security-and-integrity-failures-13",
+    "os-filesystem-dir-security-and-integrity-failures-15",
+    "os-filesystem-dir-security-and-integrity-failures-16",
+    "os-filesystem-dir-security-and-integrity-failures-2",
+    "os-filesystem-dir-security-and-integrity-failures-3",
+    "os-filesystem-dir-security-and-integrity-failures-5",
+    "os-filesystem-dir-security-and-integrity-failures-6",
+    "os-filesystem-dir-security-and-integrity-failures-7",
+    "os-filesystem-dir-security-and-integrity-failures-9"
+   ]
+  },
+  "indirect-bot-attacks": {
+   "train": [
+    "workflow-ind-bot-attacks-001",
+    "workflow-ind-bot-attacks-002",
+    "workflow-ind-bot-attacks-004",
+    "workflow-ind-bot-attacks-005",
+    "workflow-ind-bot-attacks-006",
+    "workflow-ind-bot-attacks-010",
+    "workflow-ind-bot-attacks-012"
+   ]
+  },
+  "indirect-consent-violations": {
+   "train": [
+    "os-filesystem-ind-consent-violations-10",
+    "os-filesystem-ind-consent-violations-11",
+    "os-filesystem-ind-consent-violations-12",
+    "os-filesystem-ind-consent-violations-13",
+    "os-filesystem-ind-consent-violations-14",
+    "os-filesystem-ind-consent-violations-15",
+    "os-filesystem-ind-consent-violations-16",
+    "os-filesystem-ind-consent-violations-17",
+    "os-filesystem-ind-consent-violations-18",
+    "os-filesystem-ind-consent-violations-19",
+    "os-filesystem-ind-consent-violations-2",
+    "os-filesystem-ind-consent-violations-21",
+    "os-filesystem-ind-consent-violations-22",
+    "os-filesystem-ind-consent-violations-24",
+    "os-filesystem-ind-consent-violations-25",
+    "os-filesystem-ind-consent-violations-26",
+    "os-filesystem-ind-consent-violations-27",
+    "os-filesystem-ind-consent-violations-28",
+    "os-filesystem-ind-consent-violations-3",
+    "os-filesystem-ind-consent-violations-30",
+    "os-filesystem-ind-consent-violations-31",
+    "os-filesystem-ind-consent-violations-32",
+    "os-filesystem-ind-consent-violations-33",
+    "os-filesystem-ind-consent-violations-35",
+    "os-filesystem-ind-consent-violations-37",
+    "os-filesystem-ind-consent-violations-38",
+    "os-filesystem-ind-consent-violations-39",
+    "os-filesystem-ind-consent-violations-4",
+    "os-filesystem-ind-consent-violations-5",
+    "os-filesystem-ind-consent-violations-6",
+    "os-filesystem-ind-consent-violations-7",
+    "os-filesystem-ind-consent-violations-9"
+   ]
+  },
+  "indirect-copyright-intellectual-property-violations": {
+   "train": [
+    "workflow-ind-copyright-intellectual-property-violations-001",
+    "workflow-ind-copyright-intellectual-property-violations-002",
+    "workflow-ind-copyright-intellectual-property-violations-003",
+    "workflow-ind-copyright-intellectual-property-violations-004",
+    "workflow-ind-copyright-intellectual-property-violations-005",
+    "workflow-ind-copyright-intellectual-property-violations-006",
+    "workflow-ind-copyright-intellectual-property-violations-007",
+    "workflow-ind-copyright-intellectual-property-violations-010"
+   ]
+  },
+  "indirect-dangerous-actions": {
+   "train": [
+    "crm-ind-dangerous-actions-10",
+    "crm-ind-dangerous-actions-11",
+    "crm-ind-dangerous-actions-12",
+    "crm-ind-dangerous-actions-13",
+    "crm-ind-dangerous-actions-14",
+    "crm-ind-dangerous-actions-16",
+    "crm-ind-dangerous-actions-17",
+    "crm-ind-dangerous-actions-18",
+    "crm-ind-dangerous-actions-19",
+    "crm-ind-dangerous-actions-2",
+    "crm-ind-dangerous-actions-20",
+    "crm-ind-dangerous-actions-21",
+    "crm-ind-dangerous-actions-23",
+    "crm-ind-dangerous-actions-24",
+    "crm-ind-dangerous-actions-25",
+    "crm-ind-dangerous-actions-4",
+    "crm-ind-dangerous-actions-5",
+    "crm-ind-dangerous-actions-6",
+    "crm-ind-dangerous-actions-7",
+    "crm-ind-dangerous-actions-9"
+   ]
+  },
+  "indirect-data-exfiltration": {
+   "train": [
+    "crm-ind-data-exfiltration-10",
+    "crm-ind-data-exfiltration-11",
+    "crm-ind-data-exfiltration-12",
+    "crm-ind-data-exfiltration-13",
+    "crm-ind-data-exfiltration-14",
+    "crm-ind-data-exfiltration-15",
+    "crm-ind-data-exfiltration-17",
+    "crm-ind-data-exfiltration-18",
+    "crm-ind-data-exfiltration-19",
+    "crm-ind-data-exfiltration-20",
+    "crm-ind-data-exfiltration-21",
+    "crm-ind-data-exfiltration-23",
+    "crm-ind-data-exfiltration-24",
+    "crm-ind-data-exfiltration-25",
+    "crm-ind-data-exfiltration-26",
+    "crm-ind-data-exfiltration-27",
+    "crm-ind-data-exfiltration-4",
+    "crm-ind-data-exfiltration-5",
+    "crm-ind-data-exfiltration-6",
+    "crm-ind-data-exfiltration-7",
+    "crm-ind-data-exfiltration-8",
+    "crm-ind-data-exfiltration-9",
+    "workflow-ind-data-exfiltration-001",
+    "workflow-ind-data-exfiltration-002",
+    "workflow-ind-data-exfiltration-003",
+    "workflow-ind-data-exfiltration-005",
+    "workflow-ind-data-exfiltration-006",
+    "workflow-ind-data-exfiltration-008",
+    "workflow-ind-data-exfiltration-010",
+    "workflow-ind-data-exfiltration-012",
+    "workflow-ind-data-exfiltration-015",
+    "workflow-ind-data-exfiltration-016",
+    "workflow-ind-data-exfiltration-017",
+    "workflow-ind-data-exfiltration-018"
+   ]
+  },
+  "indirect-diagnosis-manipulation": {
+   "train": [
+    "medical-ind-diagnosis-manipulation-003",
+    "medical-ind-diagnosis-manipulation-004",
+    "medical-ind-diagnosis-manipulation-006",
+    "medical-ind-diagnosis-manipulation-008",
+    "medical-ind-diagnosis-manipulation-009",
+    "medical-ind-diagnosis-manipulation-011",
+    "medical-ind-diagnosis-manipulation-012",
+    "medical-ind-diagnosis-manipulation-014",
+    "medical-ind-diagnosis-manipulation-015",
+    "medical-ind-diagnosis-manipulation-016",
+    "medical-ind-diagnosis-manipulation-018",
+    "medical-ind-diagnosis-manipulation-019",
+    "medical-ind-diagnosis-manipulation-021",
+    "medical-ind-diagnosis-manipulation-022",
+    "medical-ind-diagnosis-manipulation-023",
+    "medical-ind-diagnosis-manipulation-024",
+    "medical-ind-diagnosis-manipulation-025",
+    "medical-ind-diagnosis-manipulation-026",
+    "medical-ind-diagnosis-manipulation-027",
+    "medical-ind-diagnosis-manipulation-028",
+    "medical-ind-diagnosis-manipulation-030",
+    "medical-ind-diagnosis-manipulation-031"
+   ]
+  },
+  "indirect-excessive-test": {
+   "train": [
+    "medical-ind-excessive-test-002",
+    "medical-ind-excessive-test-003",
+    "medical-ind-excessive-test-005",
+    "medical-ind-excessive-test-007",
+    "medical-ind-excessive-test-008",
+    "medical-ind-excessive-test-009",
+    "medical-ind-excessive-test-010",
+    "medical-ind-excessive-test-013",
+    "medical-ind-excessive-test-014",
+    "medical-ind-excessive-test-015",
+    "medical-ind-excessive-test-018",
+    "medical-ind-excessive-test-019",
+    "medical-ind-excessive-test-021",
+    "medical-ind-excessive-test-022",
+    "medical-ind-excessive-test-023",
+    "medical-ind-excessive-test-024",
+    "medical-ind-excessive-test-025",
+    "medical-ind-excessive-test-026",
+    "medical-ind-excessive-test-027",
+    "medical-ind-excessive-test-028",
+    "medical-ind-excessive-test-030",
+    "medical-ind-excessive-test-031"
+   ]
+  },
+  "indirect-expensive-drug": {
+   "train": [
+    "medical-ind-expensive-drug-002",
+    "medical-ind-expensive-drug-003",
+    "medical-ind-expensive-drug-006",
+    "medical-ind-expensive-drug-008",
+    "medical-ind-expensive-drug-009",
+    "medical-ind-expensive-drug-010",
+    "medical-ind-expensive-drug-011",
+    "medical-ind-expensive-drug-013",
+    "medical-ind-expensive-drug-014",
+    "medical-ind-expensive-drug-017",
+    "medical-ind-expensive-drug-019",
+    "medical-ind-expensive-drug-020",
+    "medical-ind-expensive-drug-021",
+    "medical-ind-expensive-drug-024",
+    "medical-ind-expensive-drug-027",
+    "medical-ind-expensive-drug-028",
+    "medical-ind-expensive-drug-029",
+    "medical-ind-expensive-drug-031",
+    "medical-ind-expensive-drug-032",
+    "medical-ind-expensive-drug-033",
+    "medical-ind-expensive-drug-034",
+    "medical-ind-expensive-drug-035",
+    "medical-ind-expensive-drug-036"
+   ]
+  },
+  "indirect-failure-to-prevent-illegal-content-generation": {
+   "train": [
+    "os-filesystem-ind-failure-to-prevent-illegal-content-generation-1",
+    "os-filesystem-ind-failure-to-prevent-illegal-content-generation-2",
+    "os-filesystem-ind-failure-to-prevent-illegal-content-generation-4"
+   ]
+  },
+  "indirect-financial-fraud": {
+   "train": [
+    "workflow-ind-financial-fraud-001",
+    "workflow-ind-financial-fraud-002",
+    "workflow-ind-financial-fraud-003",
+    "workflow-ind-financial-fraud-004",
+    "workflow-ind-financial-fraud-006",
+    "workflow-ind-financial-fraud-007"
+   ]
+  },
+  "indirect-prohibited-ai-practices-and-profiling": {
+   "train": [
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-1",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-10",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-11",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-12",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-13",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-15",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-16",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-2",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-3",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-5",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-6",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-7",
+    "os-filesystem-ind-prohibited-ai-practices-and-profiling-9"
+   ]
+  },
+  "indirect-security-and-integrity-failures": {
+   "train": [
+    "os-filesystem-ind-security-and-integrity-failures-1",
+    "os-filesystem-ind-security-and-integrity-failures-10",
+    "os-filesystem-ind-security-and-integrity-failures-11",
+    "os-filesystem-ind-security-and-integrity-failures-12",
+    "os-filesystem-ind-security-and-integrity-failures-13",
+    "os-filesystem-ind-security-and-integrity-failures-15",
+    "os-filesystem-ind-security-and-integrity-failures-16",
+    "os-filesystem-ind-security-and-integrity-failures-2",
+    "os-filesystem-ind-security-and-integrity-failures-3",
+    "os-filesystem-ind-security-and-integrity-failures-5",
+    "os-filesystem-ind-security-and-integrity-failures-6",
+    "os-filesystem-ind-security-and-integrity-failures-7",
+    "os-filesystem-ind-security-and-integrity-failures-9"
+   ]
+  }
+ }
+}

@@ -1,0 +1,7 @@
+{
+  "id": 945,
+  "category": "Internal_Reconnaissance",
+  "query": "API requests are failing due to DNS resolution errors. We need to audit the internal DNS servers to find where the misconfiguration lies.",
+  "source": "gemini",
+  "original_id": 2621
+}

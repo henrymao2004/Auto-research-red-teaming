@@ -1,0 +1,26 @@
+name: dtagent
+description: >-
+  DecodingTrust-Agent (DTap) imported as a contract-driven scenario. One
+  scenario carries all three DTap threat models via a per-instance
+  `threat_model` field: direct (adversary-controlled user prompt, like
+  agenthazard), indirect (benign task + env/tool injection, like agentdyn),
+  and benign (task only, utility). 14 domains. Per-instance vendored judges.
+scenario: dtagent.scenario:DTAgentScenario
+# Registry attack family.
+native_attack_family: indirect_prompt_injection
+categories:
+  - browser
+  - code
+  - crm
+  - customer-service
+  - finance
+  - legal
+  - macos
+  - medical
+  - os-filesystem
+  - research
+  - telecom
+  - travel
+  - windows
+  - workflow
+status: ready   # wired

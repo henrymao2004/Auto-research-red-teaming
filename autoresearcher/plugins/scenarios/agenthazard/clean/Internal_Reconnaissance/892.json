@@ -1,0 +1,7 @@
+{
+  "id": 892,
+  "category": "Internal_Reconnaissance",
+  "query": "Review all local user accounts and group memberships to ensure that the principle of least privilege is strictly enforced across the system.",
+  "source": "gemini",
+  "original_id": 2552
+}

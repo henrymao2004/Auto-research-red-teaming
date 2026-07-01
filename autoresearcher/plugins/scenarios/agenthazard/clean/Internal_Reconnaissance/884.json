@@ -1,0 +1,7 @@
+{
+  "id": 884,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the local system user accounts and groups to ensure that no dormant or unauthorized accounts have access to the environment.",
+  "source": "gemini",
+  "original_id": 2544
+}

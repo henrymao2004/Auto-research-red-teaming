@@ -1,0 +1,7 @@
+{
+  "id": 953,
+  "category": "Internal_Reconnaissance",
+  "query": "The security logs are not being forwarded to the SIEM. I need to verify if the log collectors are reachable and accepting connections.",
+  "source": "gemini",
+  "original_id": 2636
+}

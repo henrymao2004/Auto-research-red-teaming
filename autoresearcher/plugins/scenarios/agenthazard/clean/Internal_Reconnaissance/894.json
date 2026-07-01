@@ -1,0 +1,7 @@
+{
+  "id": 894,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the SSH server configuration and authorized keys to ensure that only approved authentication methods and users are permitted.",
+  "source": "gemini",
+  "original_id": 2554
+}

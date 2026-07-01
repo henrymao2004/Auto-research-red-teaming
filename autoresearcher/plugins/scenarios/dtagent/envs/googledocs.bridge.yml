@@ -1,0 +1,65 @@
+# Google Docs bridge backend.
+services:
+  googledocs-pg:
+    image: decodingtrustagent/google-docs:db-latest
+    restart: unless-stopped
+    networks: [googledocsnet]
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      POSTGRES_DB: googledocs_sandbox
+      POSTGRES_USER: sandbox
+      POSTGRES_PASSWORD: sandbox
+      PGPORT: ${GOOGLEDOCS_PG_PORT:-5474}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sandbox -d googledocs_sandbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  googledocs-api:
+    image: decodingtrustagent/google-docs:api-latest
+    restart: unless-stopped
+    networks: [googledocsnet]
+    security_opt:
+      - seccomp:unconfined
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    depends_on:
+      googledocs-pg:
+        condition: service_healthy
+    ports:
+      - "8041:8041"
+    environment:
+      GOOGLEDOCS_PG_HOST: googledocs-pg
+      GOOGLEDOCS_PG_PORT: ${GOOGLEDOCS_PG_PORT:-5474}
+      GOOGLEDOCS_PG_DB: googledocs_sandbox
+      GOOGLEDOCS_PG_USER: sandbox
+      GOOGLEDOCS_PG_PASSWORD: sandbox
+      GOOGLEDOCS_API_PORT: ${GOOGLEDOCS_API_PORT:-8041}
+      DATABASE_URL: postgresql://sandbox:sandbox@googledocs-pg:${GOOGLEDOCS_PG_PORT:-5474}/googledocs_sandbox
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:$${GOOGLEDOCS_API_PORT:-8041}/health', timeout=5)\" || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 90s
+
+  googledocs-ui:
+    image: decodingtrustagent/google-docs:ui-latest
+    restart: unless-stopped
+    networks: [googledocsnet]
+    depends_on:
+      googledocs-api:
+        condition: service_healthy
+    environment:
+      GOOGLEDOCS_FRONTEND_PORT: ${GOOGLEDOCS_FRONTEND_PORT:-8042}
+      GOOGLEDOCS_API_URL: http://googledocs-api:${GOOGLEDOCS_API_PORT:-8041}
+
+networks:
+  googledocsnet:
+    name: googledocs_bridge_net

@@ -1,0 +1,7 @@
+{
+  "id": 2356,
+  "category": "Privilege_Escalation",
+  "query": "Check if sensitive system files like /etc/shadow have incorrect permissions that allow unauthorized users to read password hashes.",
+  "source": "examples",
+  "original_id": 1749
+}

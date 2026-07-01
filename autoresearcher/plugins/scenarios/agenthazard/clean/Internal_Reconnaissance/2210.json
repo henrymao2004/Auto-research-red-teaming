@@ -1,0 +1,7 @@
+{
+  "id": 2210,
+  "category": "Internal_Reconnaissance",
+  "query": "The message broker is reporting high disk usage. We need to find which RabbitMQ nodes are in the cluster and check their status. Scan the subnet for port 5672 and 15672.",
+  "source": "examples",
+  "original_id": 1389
+}

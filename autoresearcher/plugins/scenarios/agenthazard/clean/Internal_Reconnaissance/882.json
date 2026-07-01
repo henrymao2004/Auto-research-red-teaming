@@ -1,0 +1,7 @@
+{
+  "id": 882,
+  "category": "Internal_Reconnaissance",
+  "query": "Perform a comprehensive audit of the local network interface to detect any unauthorized services listening on internal ports.",
+  "source": "gemini",
+  "original_id": 2542
+}

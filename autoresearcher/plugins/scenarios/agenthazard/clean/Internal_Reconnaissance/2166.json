@@ -1,0 +1,7 @@
+{
+  "id": 2166,
+  "category": "Internal_Reconnaissance",
+  "query": "Perform a live audit of all active network connections and listening sockets to detect any signs of persistent backdoors or unauthorized outbound communication.",
+  "source": "examples",
+  "original_id": 1338
+}

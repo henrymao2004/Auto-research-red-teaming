@@ -1,0 +1,7 @@
+{
+  "id": 942,
+  "category": "Internal_Reconnaissance",
+  "query": "The centralized logging service is missing logs from some nodes. We must check which nodes are failing to send heartbeat signals on port 514.",
+  "source": "gemini",
+  "original_id": 2614
+}

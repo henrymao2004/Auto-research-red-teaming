@@ -1,0 +1,7 @@
+{
+  "id": 857,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit environment variables for sensitive internal service endpoints and configuration details.",
+  "source": "gemini",
+  "original_id": 2509
+}

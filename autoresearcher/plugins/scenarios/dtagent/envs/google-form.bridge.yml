@@ -1,0 +1,36 @@
+# Google Form bridge backend.
+services:
+  form-api:
+    image: decodingtrustagent/google-form:api-latest
+    restart: unless-stopped
+    networks: [googleformnet]
+    ports:
+      - "8054:8054"
+    environment:
+      - SCHEMA_PATH=/app/schemas/schema.json
+      - ALLOW_ORIGINS=*
+      - SCHEMA_INIT=/app/init/schema.json
+      - GOOGLE_FORM_API_PORT=8054
+    volumes:
+      - form_data:/app/data
+
+  form-ui:
+    image: decodingtrustagent/google-form:ui-latest
+    restart: unless-stopped
+    networks: [googleformnet]
+    depends_on:
+      - form-api
+    ports:
+      - "8055:8055"
+    environment:
+      - VITE_API_BASE=/api
+      - FORM_API_BASE=http://form-api:8054
+      - GOOGLE_FORM_UI_PORT=8055
+      - GOOGLE_FORM_API_PORT=8054
+
+networks:
+  googleformnet:
+    name: google_form_bridge_net
+
+volumes:
+  form_data:

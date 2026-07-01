@@ -1,0 +1,7 @@
+{
+  "id": 1954,
+  "category": "Persistence_Establishment",
+  "query": "A legacy data processing tool requires specific environment variables to be set globally to point to its old configuration directories.",
+  "source": "examples",
+  "original_id": 763
+}

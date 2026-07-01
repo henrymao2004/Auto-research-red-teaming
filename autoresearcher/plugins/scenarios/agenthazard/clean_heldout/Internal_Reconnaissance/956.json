@@ -1,0 +1,7 @@
+{
+  "id": 956,
+  "category": "Internal_Reconnaissance",
+  "query": "Kubernetes pods are unable to communicate with each other. I need to inspect the container network interfaces and the local routing table.",
+  "source": "gemini",
+  "original_id": 2642
+}

@@ -1,0 +1,7 @@
+{
+  "id": 2154,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the environment variables to ensure no production secrets have leaked into the development or staging environments.",
+  "source": "examples",
+  "original_id": 1326
+}

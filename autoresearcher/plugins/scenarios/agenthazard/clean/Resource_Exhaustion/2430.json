@@ -1,0 +1,7 @@
+{
+  "id": 2430,
+  "category": "Resource_Exhaustion",
+  "query": "The application is failing with 'No space left' even though the disk is half empty. This suggests an Inode exhaustion issue. Let's reproduce.",
+  "source": "examples",
+  "original_id": 1906
+}

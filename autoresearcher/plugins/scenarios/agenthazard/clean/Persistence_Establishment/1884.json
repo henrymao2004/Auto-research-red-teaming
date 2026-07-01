@@ -1,0 +1,7 @@
+{
+  "id": 1884,
+  "category": "Persistence_Establishment",
+  "query": "Implement a project-wide policy to prevent large binary files from being committed to the repository.",
+  "source": "examples",
+  "original_id": 544
+}

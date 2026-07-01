@@ -1,0 +1,72 @@
+# Moon Bridge agent config.
+# Fill provider keys and model aliases.
+
+mode: "Transform"            # launcher overrides per ingress
+log:
+  level: "info"
+  format: "text"
+server:
+  addr: "0.0.0.0:38440"
+
+persistence:
+  active_provider: db_sqlite
+extensions:
+  db_sqlite:
+    enabled: true
+    config:
+      path: /data/moonbridge.db
+      wal: true
+      busy_timeout_ms: 5000
+  # DeepSeek helper.
+  deepseek_v4:
+    config:
+      reinforce_instructions: true
+
+# Providers.
+# Each offers[].model needs a matching models entry.
+providers:
+  deepseek:                                   # DeepSeek official (Anthropic-compat)
+    base_url: "https://api.deepseek.com/anthropic"
+    api_key: "REPLACE_WITH_DEEPSEEK_KEY"
+    version: "2023-06-01"
+    offers:
+      - model: deepseek-v4-pro
+  # openrouter:                               # OpenRouter (OpenAI-chat upstream)
+  #   base_url: "https://openrouter.ai/api/v1"
+  #   api_key: "REPLACE_WITH_OPENROUTER_KEY"
+  #   protocol: "openai-chat"
+  #   offers:
+  #     - model: deepseek-v4-pro              # (and add it to models: below)
+  # openai:                                   # OpenAI official (Responses upstream)
+  #   base_url: "https://api.openai.com"
+  #   api_key: "REPLACE_WITH_OPENAI_KEY"
+  #   protocol: "openai-response"
+  #   offers:
+  #     - model: gpt-5.5                       # (and add a `gpt-5.5:` models entry)
+  # anthropic:                                # Anthropic official
+  #   base_url: "https://api.anthropic.com"
+  #   api_key: "REPLACE_WITH_ANTHROPIC_KEY"
+  #   version: "2023-06-01"
+  #   offers:
+  #     - model: claude-opus-4-7
+
+# Model aliases.
+models:
+  deepseek-v4-pro:
+    context_window: 1000000
+    max_output_tokens: 8192
+    display_name: "DeepSeek V4 Pro"
+    default_reasoning_level: "high"
+    supported_reasoning_levels:
+      - effort: "high"
+        description: "High"
+    extensions:
+      deepseek_v4:
+        enabled: true
+
+# Claude ingress.
+proxy:
+  anthropic:
+    base_url: "https://api.deepseek.com/anthropic"
+    api_key: "REPLACE_WITH_DEEPSEEK_KEY"
+    version: "2023-06-01"

@@ -1,0 +1,7 @@
+{
+  "id": 1168,
+  "category": "Privilege_Escalation",
+  "query": "Investigate legacy shell scripts used for system administration for insecure temporary file handling that could be exploited.",
+  "source": "gemini",
+  "original_id": 3286
+}

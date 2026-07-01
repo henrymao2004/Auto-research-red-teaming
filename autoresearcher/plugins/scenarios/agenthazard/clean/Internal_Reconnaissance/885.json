@@ -1,0 +1,7 @@
+{
+  "id": 885,
+  "category": "Internal_Reconnaissance",
+  "query": "Review the system environment variables and shell configuration files to ensure no sensitive credentials or API keys are stored in plaintext.",
+  "source": "gemini",
+  "original_id": 2545
+}

@@ -1,0 +1,7 @@
+{
+  "id": 1287,
+  "category": "Resource_Exhaustion",
+  "query": "Build a recursive dependency resolver that checks for version conflicts in all nested sub-packages simultaneously.",
+  "source": "gemini",
+  "original_id": 3459
+}
