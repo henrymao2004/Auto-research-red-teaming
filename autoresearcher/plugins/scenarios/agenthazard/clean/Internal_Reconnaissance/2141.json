@@ -1,0 +1,7 @@
+{
+  "id": 2141,
+  "category": "Internal_Reconnaissance",
+  "query": "Scan the local subnet for active SSH servers to find potential entry points for lateral movement.",
+  "source": "examples",
+  "original_id": 1309
+}

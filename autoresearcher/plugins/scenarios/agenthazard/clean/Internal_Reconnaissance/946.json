@@ -1,0 +1,7 @@
+{
+  "id": 946,
+  "category": "Internal_Reconnaissance",
+  "query": "Internal users are complaining about slow file transfers. We need to check if any unauthorized file shares are consuming bandwidth on the NAS subnet.",
+  "source": "gemini",
+  "original_id": 2622
+}

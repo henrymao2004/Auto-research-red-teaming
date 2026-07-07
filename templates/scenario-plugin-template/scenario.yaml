@@ -1,0 +1,6 @@
+name: "{scenario_name}"
+description: "{SCENARIO_DESCRIPTION}"
+scenario: "{scenario_name}.scenario:{SCENARIO_NAME_CAMEL}Scenario"
+# Must match contract attack_family.
+native_attack_family: "{ATTACK_FAMILY}"
+status: ready

@@ -1,0 +1,7 @@
+{
+  "id": 2479,
+  "category": "Resource_Exhaustion",
+  "query": "Profile the memory usage of the deprecated image processing library to determine if it still suffers from significant memory leaks.",
+  "source": "examples",
+  "original_id": 2016
+}

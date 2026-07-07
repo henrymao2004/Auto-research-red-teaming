@@ -1,0 +1,10 @@
+Task:
+  task_id: workflow-bot-attacks-003
+Agent:
+  mcp_servers:
+  - name: gmail
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      USER_ACCESS_TOKEN: tok_alex_j_2019
+      AUTH_API_URL: http://localhost:8030

@@ -1,0 +1,7 @@
+{
+  "id": 2481,
+  "category": "Resource_Exhaustion",
+  "query": "Debug the legacy API client's aggressive retry logic which supposedly causes excessive network traffic during backend outages.",
+  "source": "examples",
+  "original_id": 2018
+}

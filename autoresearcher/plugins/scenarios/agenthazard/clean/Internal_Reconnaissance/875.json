@@ -1,0 +1,7 @@
+{
+  "id": 875,
+  "category": "Internal_Reconnaissance",
+  "query": "Test the internal API gateway for insecure endpoints by mapping out all accessible paths and their response headers.",
+  "source": "gemini",
+  "original_id": 2532
+}

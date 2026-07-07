@@ -1,0 +1,1181 @@
+"""Atlassian MCP Server (Jira + Confluence Sandbox)."""
+from __future__ import annotations
+
+import os
+import json
+from typing import Optional, Dict, Any, List
+
+import httpx
+from fastmcp import FastMCP
+from pathlib import Path
+
+try:
+    import yaml
+except Exception:
+    yaml = None
+
+
+ATLASSIAN_API = os.getenv("ATLASSIAN_API_URL", "http://localhost:8040")
+DEFAULT_USER_ACCESS_TOKEN = os.getenv("USER_ACCESS_TOKEN", "")
+DEFAULT_CLOUD_ID = os.getenv("ATLASSIAN_CLOUD_ID", "sandbox-cloud-001")
+
+mcp = FastMCP("Atlassian MCP Server (Jira/Confluence Sandbox)")
+
+
+def _port_from_registry(default_port: int) -> int:
+    try:
+        if yaml is None:
+            return default_port
+        registry_path = Path(__file__).resolve().parent.parent / "registry.yaml"
+        if not registry_path.exists():
+            return default_port
+        data = yaml.safe_load(registry_path.read_text()) or {}
+        service_name = Path(__file__).resolve().parent.name
+        for srv in (data.get("servers") or []):
+            if isinstance(srv, dict) and srv.get("name") == service_name:
+                env = srv.get("env") or {}
+                port_str = str(env.get("PORT") or "").strip().strip('"')
+                return int(port_str) if port_str else default_port
+    except Exception:
+        return default_port
+    return default_port
+
+
+def _resolve_token(token: Optional[str] = None) -> str:
+    return (token or DEFAULT_USER_ACCESS_TOKEN or "").strip()
+
+
+def _headers(token: Optional[str] = None) -> Dict[str, str]:
+    resolved = _resolve_token(token)
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    if resolved:
+        headers["Authorization"] = f"Bearer {resolved}"
+    return headers
+
+
+def _parse_list_param(val: Any) -> Optional[List[str]]:
+    if val is None:
+        return None
+    if isinstance(val, list):
+        return val
+    if isinstance(val, str):
+        val = val.strip()
+        if val.startswith('['):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+        if val:
+            return [val]
+    return None
+
+
+def _normalize_priority(value: Any) -> str:
+    priority = str(value or "medium").strip().lower()
+    mapping = {
+        "critical": "highest",
+        "highest": "highest",
+        "high": "high",
+        "medium": "medium",
+        "low": "low",
+        "lowest": "lowest",
+        "p1": "highest",
+        "p2": "high",
+        "p3": "medium",
+        "p4": "low",
+        "p5": "lowest",
+    }
+    return mapping.get(priority, "medium")
+
+
+def _normalize_issue_reference(value: Any) -> str:
+    return str(value or "").strip().lower()
+
+
+def _issue_matches_reference(item: Dict[str, Any], reference: str) -> bool:
+    ref = _normalize_issue_reference(reference)
+    if not ref:
+        return False
+    key = _normalize_issue_reference(item.get("key"))
+    if key == ref:
+        return True
+    haystacks = [
+        item.get("title"),
+        item.get("summary"),
+        item.get("description"),
+    ]
+    return any(ref in _normalize_issue_reference(value) for value in haystacks)
+
+
+async def _resolve_user_id(client: httpx.AsyncClient, user_ref: Optional[str]) -> Optional[str]:
+    raw = str(user_ref or "").strip()
+    if not raw:
+        return None
+    if _looks_like_uuid(raw):
+        return raw
+
+    for endpoint, params in (
+        (f"{ATLASSIAN_API}/api/users/search", {"query": raw}),
+        (f"{ATLASSIAN_API}/api/users", {"search": raw}),
+    ):
+        r = await client.get(endpoint, params=params, headers=_headers())
+        if r.status_code != 200:
+            continue
+        payload = r.json()
+        items = payload if isinstance(payload, list) else payload.get("items", [])
+        if not isinstance(items, list):
+            continue
+        raw_lower = raw.lower()
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            item_id = item.get("id")
+            if not item_id:
+                continue
+            emails = [
+                item.get("email"),
+                item.get("emailAddress"),
+            ]
+            names = [
+                item.get("displayName"),
+                item.get("name"),
+            ]
+            if any(str(v or "").strip().lower() == raw_lower for v in emails + names):
+                return str(item_id)
+        if items and isinstance(items[0], dict) and items[0].get("id"):
+            return str(items[0]["id"])
+    return raw
+
+
+def _looks_like_uuid(value: Optional[str]) -> bool:
+    if not value:
+        return False
+    text = str(value).strip()
+    return len(text) == 36 and text.count("-") == 4
+
+
+async def _resolve_issue_id(client: httpx.AsyncClient, issue_id_or_key: str) -> str:
+    """Resolve Jira issue keys like ACME-1 to backend UUIDs."""
+    key = str(issue_id_or_key or "").strip()
+    if not key or _looks_like_uuid(key):
+        return key
+
+    direct_search = await client.get(
+        f"{ATLASSIAN_API}/api/issues/search",
+        params={"q": key, "limit": 25, "offset": 0},
+        headers=_headers(),
+    )
+    if direct_search.status_code == 200:
+        items = direct_search.json().get("items", [])
+        for item in items:
+            if isinstance(item, dict) and _issue_matches_reference(item, key) and item.get("id"):
+                return str(item["id"])
+
+    page_size = 200
+    for offset in range(0, 1000, page_size):
+        search_r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/search",
+            params={"limit": page_size, "offset": offset},
+            headers=_headers(),
+        )
+        if search_r.status_code != 200:
+            break
+        items = search_r.json().get("items", [])
+        for item in items:
+            if isinstance(item, dict) and _issue_matches_reference(item, key) and item.get("id"):
+                return str(item["id"])
+        if len(items) < page_size:
+            break
+
+    project_key = key.split("-", 1)[0].strip().upper()
+    if project_key:
+        project_r = await client.get(
+            f"{ATLASSIAN_API}/api/projects",
+            params={"search": project_key, "limit": 50, "offset": 0},
+            headers=_headers(),
+        )
+        if project_r.status_code == 200:
+            for project in project_r.json().get("items", []):
+                if (project.get("key") or "").upper() != project_key:
+                    continue
+                project_id = project.get("id")
+                if not project_id:
+                    continue
+                for offset in range(0, 1000, page_size):
+                    list_r = await client.get(
+                        f"{ATLASSIAN_API}/api/issues/projects/{project_id}",
+                        params={"limit": page_size, "offset": offset},
+                        headers=_headers(),
+                    )
+                    if list_r.status_code != 200:
+                        break
+                    items = list_r.json().get("items", [])
+                    for item in items:
+                        if item.get("key") == key and item.get("id"):
+                            return str(item["id"])
+                    if len(items) < page_size:
+                        break
+
+    return key
+
+
+@mcp.tool()
+async def atlassianUserInfo() -> Any:
+    """Get current user info from Atlassian."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/auth/me",
+            headers=_headers()
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def getAccessibleAtlassianResources() -> Any:
+    """Get cloudId to construct API calls to Atlassian REST APIs."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/projects",
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+        return [{
+            "id": DEFAULT_CLOUD_ID,
+            "name": "Sandbox Atlassian",
+            "url": ATLASSIAN_API,
+            "scopes": ["read:jira-work", "write:jira-work", "read:confluence-content.all", "write:confluence-content"],
+            "avatarUrl": None
+        }]
+
+
+@mcp.tool()
+async def search(query: str) -> Any:
+    """Search across Jira and Confluence using Rovo Search (use by default for searches)."""
+    results = {"query": query, "results": []}
+
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/search",
+            params={"q": query, "limit": 25},
+            headers=_headers()
+        )
+        if r.status_code == 200:
+            data = r.json()
+            for item in data.get("items", []):
+                results["results"].append({
+                    "type": "jira_issue",
+                    "id": item.get("id"),
+                    "title": item.get("title"),
+                    "key": item.get("key"),
+                    "url": f"{ATLASSIAN_API}/issues/{item.get('id')}"
+                })
+
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/projects",
+            params={"search": query, "limit": 25},
+            headers=_headers()
+        )
+        if r.status_code == 200:
+            data = r.json()
+            for item in data.get("items", []):
+                results["results"].append({
+                    "type": "confluence_space",
+                    "id": item.get("id"),
+                    "title": item.get("name"),
+                    "key": item.get("key"),
+                    "url": f"{ATLASSIAN_API}/projects/{item.get('id')}"
+                })
+    
+    return results
+
+
+@mcp.tool()
+async def fetch(id: str) -> Any:
+    """Get details by ARI (Atlassian Resource Identifier)."""
+    parts = id.split("/")
+    resource_id = parts[-1] if parts else id
+
+    if "issue" in id.lower() or "jira" in id.lower():
+        return await getJiraIssue(cloudId=DEFAULT_CLOUD_ID, issueIdOrKey=resource_id)
+    elif "page" in id.lower() or "confluence" in id.lower():
+        return await getConfluencePage(cloudId=DEFAULT_CLOUD_ID, pageId=resource_id)
+    else:
+        try:
+            return await getJiraIssue(cloudId=DEFAULT_CLOUD_ID, issueIdOrKey=resource_id)
+        except Exception:
+            return await getConfluencePage(cloudId=DEFAULT_CLOUD_ID, pageId=resource_id)
+
+
+@mcp.tool()
+async def getVisibleJiraProjects(
+    cloudId: str,
+    searchString: Optional[str] = None,
+    action: Optional[str] = None,
+    expandIssueTypes: Optional[bool] = None,
+    startAt: Optional[int] = None,
+    maxResults: Optional[int] = None
+) -> Any:
+    """Get Jira projects visible to the user."""
+    params = {
+        "limit": maxResults or 25,
+        "offset": startAt or 0
+    }
+    if searchString:
+        params["search"] = searchString
+    
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/projects",
+            params=params,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def getJiraProjectIssueTypesMetadata(
+    cloudId: str,
+    projectIdOrKey: str,
+    startAt: Optional[int] = None,
+    maxResults: Optional[int] = None
+) -> Any:
+    """Get all issue type metadata for a project."""
+    return {
+        "projectId": projectIdOrKey,
+        "issueTypes": [
+            {"id": "story", "name": "Story", "description": "User story", "subtask": False},
+            {"id": "task", "name": "Task", "description": "A task to be done", "subtask": False},
+            {"id": "bug", "name": "Bug", "description": "A defect or issue", "subtask": False},
+            {"id": "epic", "name": "Epic", "description": "A large body of work", "subtask": False}
+        ],
+        "startAt": startAt or 0,
+        "maxResults": maxResults or 50,
+        "total": 4
+    }
+
+
+@mcp.tool()
+async def getJiraIssueTypeMetaWithFields(
+    cloudId: str,
+    projectIdOrKey: str,
+    issueTypeId: str,
+    startAt: Optional[int] = None,
+    maxResults: Optional[int] = None
+) -> Any:
+    """Get metadata for a specific issue type in a project."""
+    return {
+        "projectId": projectIdOrKey,
+        "issueTypeId": issueTypeId,
+        "fields": {
+            "summary": {"required": True, "schema": {"type": "string"}, "name": "Summary"},
+            "description": {"required": False, "schema": {"type": "string"}, "name": "Description"},
+            "priority": {"required": True, "schema": {"type": "priority"}, "name": "Priority",
+                        "allowedValues": [
+                            {"id": "highest", "name": "Highest"},
+                            {"id": "high", "name": "High"},
+                            {"id": "medium", "name": "Medium"},
+                            {"id": "low", "name": "Low"},
+                            {"id": "lowest", "name": "Lowest"}
+                        ]},
+            "assignee": {"required": False, "schema": {"type": "user"}, "name": "Assignee"},
+            "labels": {"required": False, "schema": {"type": "array", "items": "string"}, "name": "Labels"},
+            "duedate": {"required": False, "schema": {"type": "date"}, "name": "Due Date"}
+        },
+        "startAt": startAt or 0,
+        "maxResults": maxResults or 50
+    }
+
+
+@mcp.tool()
+async def lookupJiraAccountId(cloudId: str, searchString: str) -> Any:
+    """Look up user account IDs by display name or email."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/users/search",
+            params={"query": searchString},
+            headers=_headers()
+        )
+        if r.status_code == 404:
+            r = await client.get(
+                f"{ATLASSIAN_API}/api/users",
+                params={"search": searchString},
+                headers=_headers()
+            )
+        if r.status_code == 200:
+            return r.json()
+        return []
+
+
+@mcp.tool()
+async def getJiraIssue(
+    cloudId: str,
+    issueIdOrKey: str,
+    expand: Optional[str] = None,
+    fields: Optional[List[str]] = None,
+    fieldsByKeys: Optional[bool] = None,
+    properties: Optional[List[str]] = None,
+    updateHistory: Optional[bool] = None,
+    failFast: Optional[bool] = None
+) -> Any:
+    """Get details of a Jira issue by ID or key."""
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        if not issue_id:
+            return {
+                "id": str(issueIdOrKey),
+                "key": str(issueIdOrKey),
+                "notFound": True,
+                "message": f"Issue '{issueIdOrKey}' not found",
+            }
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}",
+            headers=_headers()
+        )
+        if r.status_code == 404:
+            return {
+                "id": str(issueIdOrKey),
+                "key": str(issueIdOrKey),
+                "notFound": True,
+                "message": f"Issue '{issueIdOrKey}' not found",
+            }
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def createJiraIssue(
+    cloudId: str,
+    projectKey: str,
+    issueTypeName: str,
+    summary: str,
+    description: Optional[str] = None,
+    assignee_account_id: Optional[str] = None,
+    parent: Optional[str] = None,
+    additional_fields: Optional[Dict[str, Any]] = None
+) -> Any:
+    """Creates a new Jira issue in a project."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/projects",
+            params={"search": projectKey},
+            headers=_headers()
+        )
+        r.raise_for_status()
+        projects = r.json().get("items", [])
+        project = next((p for p in projects if p.get("key") == projectKey), None)
+        if not project:
+            raise ValueError(f"Project {projectKey} not found")
+        project_id = project["id"]
+
+        issue_type = issueTypeName.lower()
+        valid_types = {"story", "task", "bug", "epic"}
+        type_mapping = {"incident": "task", "feature": "story", "improvement": "story", "subtask": "task"}
+        if issue_type not in valid_types:
+            issue_type = type_mapping.get(issue_type, "task")
+
+        body = {
+            "projectId": project_id,
+            "title": summary,
+            "type": issue_type,
+            "priority": "medium"
+        }
+
+        if description:
+            body["description"] = description
+        if assignee_account_id:
+            resolved_assignee_id = await _resolve_user_id(client, assignee_account_id)
+            if resolved_assignee_id:
+                body["assigneeId"] = resolved_assignee_id
+        if parent:
+            body["parentIssueId"] = await _resolve_issue_id(client, parent)
+
+        if additional_fields:
+            if "priority" in additional_fields:
+                p = additional_fields["priority"]
+                if isinstance(p, dict):
+                    p = p.get("name", p.get("id", "medium"))
+                body["priority"] = _normalize_priority(p)
+            if "labels" in additional_fields:
+                body["labels"] = _parse_list_param(additional_fields["labels"])
+            if "dueDate" in additional_fields:
+                body["dueDate"] = additional_fields["dueDate"]
+            if "storyPoints" in additional_fields:
+                body["storyPoints"] = additional_fields["storyPoints"]
+
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues",
+            json=body,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def editJiraIssue(
+    cloudId: str,
+    issueIdOrKey: str,
+    fields: Dict[str, Any]
+) -> Any:
+    """Update details of an existing Jira issue."""
+    body = {}
+
+    field_mapping = {
+        "summary": "title",
+        "description": "description",
+        "priority": "priority",
+        "assignee": "assigneeId",
+        "labels": "labels",
+        "dueDate": "dueDate",
+        "duedate": "dueDate"
+    }
+    
+    for key, value in fields.items():
+        if key in field_mapping:
+            backend_key = field_mapping[key]
+            if key == "assignee" and isinstance(value, dict):
+                body[backend_key] = value.get("accountId") or value.get("id")
+            elif key == "labels":
+                body[backend_key] = _parse_list_param(value)
+            elif key == "priority" and isinstance(value, dict):
+                body[backend_key] = _normalize_priority(value.get("name") or value.get("id") or "medium")
+            elif key == "priority":
+                body[backend_key] = _normalize_priority(value)
+            else:
+                body[backend_key] = value
+    
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        r = await client.patch(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}",
+            json=body,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def addCommentToJiraIssue(
+    cloudId: str,
+    issueIdOrKey: str,
+    commentBody: str,
+    commentVisibility: Optional[Dict[str, Any]] = None
+) -> Any:
+    """Adds a comment to a Jira issue."""
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}/comments",
+            json={"body": commentBody},
+            headers=_headers()
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def addWorklogToJiraIssue(
+    cloudId: str,
+    issueIdOrKey: str,
+    timeSpent: str,
+    visibility: Optional[Dict[str, Any]] = None
+) -> Any:
+    """Adds a worklog entry to a Jira issue."""
+    seconds = 0
+    time_str = timeSpent.lower()
+    if 'h' in time_str:
+        parts = time_str.split('h')
+        seconds += int(parts[0].strip()) * 3600
+        time_str = parts[1] if len(parts) > 1 else ""
+    if 'm' in time_str:
+        parts = time_str.split('m')
+        seconds += int(parts[0].strip()) * 60
+    
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}/worklog",
+            json={"timeSpentSeconds": seconds},
+            headers=_headers()
+        )
+        if r.status_code == 404:
+            return {"message": "Worklog added (simulated)", "timeSpent": timeSpent, "timeSpentSeconds": seconds}
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def getTransitionsForJiraIssue(
+    cloudId: str,
+    issueIdOrKey: str,
+    expand: Optional[str] = None,
+    transitionId: Optional[str] = None,
+    skipRemoteOnlyCondition: Optional[bool] = None,
+    includeUnavailableTransitions: Optional[bool] = None,
+    sortByOpsBarAndStatus: Optional[bool] = None
+) -> Any:
+    """Get available transitions for a Jira issue."""
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}/transitions",
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        transitions = data if isinstance(data, list) else data.get("items", [])
+        return {
+            "expand": expand or "",
+            "transitions": transitions
+        }
+
+
+@mcp.tool()
+async def transitionJiraIssue(
+    cloudId: str,
+    issueIdOrKey: str,
+    transition: Dict[str, Any],
+    fields: Optional[Dict[str, Any]] = None,
+    update: Optional[Dict[str, Any]] = None,
+    historyMetadata: Optional[Dict[str, Any]] = None
+) -> Any:
+    """Transition a Jira issue to a new status."""
+    transition_id = transition.get("id") if isinstance(transition, dict) else transition
+
+    body = {"transitionId": transition_id}
+    if fields and "status" in fields:
+        body["toStatusId"] = fields["status"].get("id") if isinstance(fields["status"], dict) else fields["status"]
+    
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}/transitions",
+            json=body,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def getJiraIssueRemoteIssueLinks(
+    cloudId: str,
+    issueIdOrKey: str,
+    globalId: Optional[str] = None
+) -> Any:
+    """Get remote issue links (e.g., Confluence links) for a Jira issue."""
+    async with httpx.AsyncClient() as client:
+        issue_id = await _resolve_issue_id(client, issueIdOrKey)
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{issue_id}/remotelinks",
+            headers=_headers()
+        )
+        if r.status_code == 404:
+            return []
+        r.raise_for_status()
+        return r.json()
+
+
+@mcp.tool()
+async def searchJiraIssuesUsingJql(
+    cloudId: str,
+    jql: str,
+    fields: Optional[List[str]] = None,
+    maxResults: Optional[int] = None,
+    nextPageToken: Optional[str] = None
+) -> Any:
+    """Search Jira issues using JQL (only use when JQL is specifically mentioned)."""
+    import re
+
+    limit = maxResults or 25
+
+    async with httpx.AsyncClient() as client:
+        project_key = None
+        issue_key = None
+        search_text = None
+
+        project_match = re.search(r'project\s*=\s*["\']?(\w+)["\']?', jql, re.IGNORECASE)
+        if project_match:
+            project_key = project_match.group(1).upper()
+
+        key_match = re.search(r'(?:key\s*=\s*)?["\']?([A-Z]+-\d+)["\']?', jql, re.IGNORECASE)
+        if key_match:
+            issue_key = key_match.group(1).upper()
+
+        remaining = jql
+        remaining = re.sub(r'project\s*=\s*["\']?\w+["\']?', '', remaining, flags=re.IGNORECASE)
+        remaining = re.sub(r'key\s*=\s*["\']?[\w-]+["\']?', '', remaining, flags=re.IGNORECASE)
+        remaining = re.sub(r'\s*(AND|OR)\s*', ' ', remaining, flags=re.IGNORECASE)
+        quoted = re.findall(r'["\']([^"\']+)["\']', remaining)
+        if quoted:
+            search_text = ' '.join(quoted)
+        else:
+            remaining = remaining.strip()
+            if remaining and not remaining.upper().startswith(('ORDER', 'LIMIT')):
+                search_text = remaining
+
+        if issue_key:
+            all_issues_r = await client.get(
+                f"{ATLASSIAN_API}/api/issues/search",
+                params={"limit": 100},
+                headers=_headers()
+            )
+            if all_issues_r.status_code == 200:
+                all_data = all_issues_r.json()
+                matching = [i for i in all_data.get("items", []) if i.get("key") == issue_key]
+                if matching:
+                    return {"items": matching, "total": len(matching), "limit": limit, "offset": 0}
+
+        project_id = None
+        if project_key:
+            projects_r = await client.get(f"{ATLASSIAN_API}/api/projects", headers=_headers())
+            if projects_r.status_code == 200:
+                projects_data = projects_r.json()
+                projects_list = projects_data.get("items", projects_data) if isinstance(projects_data, dict) else projects_data
+                for p in projects_list:
+                    if p.get("key", "").upper() == project_key:
+                        project_id = p.get("id")
+                        break
+
+        params = {"limit": limit}
+        if project_id:
+            params["projectId"] = project_id
+        if search_text:
+            params["q"] = search_text
+
+        if project_id and not search_text:
+            r = await client.get(f"{ATLASSIAN_API}/api/issues", params=params, headers=_headers())
+        else:
+            if not params.get("q"):
+                params["q"] = jql
+            r = await client.get(f"{ATLASSIAN_API}/api/issues/search", params=params, headers=_headers())
+
+        r.raise_for_status()
+        result = r.json()
+
+        if result.get("total", 0) == 0 and project_id:
+            r2 = await client.get(
+                f"{ATLASSIAN_API}/api/issues",
+                params={"projectId": project_id, "limit": limit},
+                headers=_headers()
+            )
+            if r2.status_code == 200:
+                result = r2.json()
+        
+        return result
+
+
+@mcp.tool()
+async def getConfluenceSpaces(
+    cloudId: str,
+    ids: Optional[str] = None,
+    keys: Optional[str] = None,
+    type: Optional[str] = None,
+    status: Optional[str] = None,
+    labels: Optional[str] = None,
+    favoritedBy: Optional[str] = None,
+    notFavoritedBy: Optional[str] = None,
+    sort: Optional[str] = None,
+    descriptionFormat: Optional[str] = None,
+    includeIcon: Optional[bool] = None,
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None
+) -> Any:
+    """Get Confluence spaces."""
+    params = {"limit": limit or 25, "offset": 0}
+    if keys:
+        params["search"] = keys
+
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/projects",
+            params=params,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        spaces = []
+        for item in data.get("items", []):
+            spaces.append({
+                "id": item.get("id"),
+                "key": item.get("key"),
+                "name": item.get("name"),
+                "description": {"plain": {"value": item.get("description", "")}},
+                "type": "global",
+                "status": "current",
+                "icon": None
+            })
+        
+        return {"results": spaces, "_links": {}}
+
+
+@mcp.tool()
+async def getConfluencePage(
+    cloudId: str,
+    pageId: str,
+    contentFormat: Optional[str] = None
+) -> Any:
+    """Get a specific Confluence page by ID."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{pageId}",
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        issue = data.get("issue", data)
+        return {
+            "id": issue.get("id"),
+            "type": "page",
+            "status": "current",
+            "title": issue.get("title"),
+            "spaceId": issue.get("project", {}).get("id"),
+            "body": {
+                "storage": {"value": issue.get("description", ""), "representation": "storage"},
+                "view": {"value": issue.get("description", ""), "representation": "view"}
+            },
+            "version": {"number": 1, "createdAt": issue.get("createdAt")},
+            "createdAt": issue.get("createdAt"),
+            "authorId": issue.get("reporter", {}).get("id"),
+            "_links": {"webui": f"/issues/{issue.get('id')}"}
+        }
+
+
+@mcp.tool()
+async def createConfluencePage(
+    cloudId: str,
+    spaceId: str,
+    body: str,
+    title: Optional[str] = None,
+    parentId: Optional[str] = None,
+    contentFormat: Optional[str] = None,
+    subtype: Optional[str] = None,
+    isPrivate: Optional[bool] = None
+) -> Any:
+    """Create a new page in Confluence."""
+    issue_body = {
+        "projectId": spaceId,
+        "title": title or "Untitled Page",
+        "description": body,
+        "type": "task"
+    }
+
+    if parentId:
+        issue_body["parentIssueId"] = parentId
+
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues",
+            json=issue_body,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        return {
+            "id": data.get("id"),
+            "type": subtype or "page",
+            "status": "current",
+            "title": data.get("title"),
+            "spaceId": spaceId,
+            "body": {"storage": {"value": body, "representation": "storage"}},
+            "version": {"number": 1},
+            "createdAt": data.get("createdAt")
+        }
+
+
+@mcp.tool()
+async def updateConfluencePage(
+    cloudId: str,
+    pageId: str,
+    body: str,
+    title: Optional[str] = None,
+    spaceId: Optional[str] = None,
+    parentId: Optional[str] = None,
+    status: Optional[str] = None,
+    contentFormat: Optional[str] = None,
+    versionMessage: Optional[str] = None
+) -> Any:
+    """Update an existing Confluence page."""
+    update_body = {"description": body}
+    if title:
+        update_body["title"] = title
+
+    async with httpx.AsyncClient() as client:
+        r = await client.patch(
+            f"{ATLASSIAN_API}/api/issues/{pageId}",
+            json=update_body,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        return {
+            "id": data.get("id"),
+            "type": "page",
+            "status": "current",
+            "title": data.get("title"),
+            "body": {"storage": {"value": body, "representation": "storage"}},
+            "version": {"number": 2, "message": versionMessage},
+            "updatedAt": data.get("updatedAt")
+        }
+
+
+@mcp.tool()
+async def getPagesInConfluenceSpace(
+    cloudId: str,
+    spaceId: str,
+    title: Optional[str] = None,
+    status: Optional[str] = None,
+    subtype: Optional[str] = None,
+    depth: Optional[str] = None,
+    sort: Optional[str] = None,
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None
+) -> Any:
+    """Get all pages within a Confluence space."""
+    params = {"limit": limit or 25}
+    if title:
+        params["search"] = title
+
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/projects/{spaceId}",
+            params=params,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        pages = []
+        for item in data.get("items", []):
+            pages.append({
+                "id": item.get("id"),
+                "type": "page",
+                "status": "current",
+                "title": item.get("title"),
+                "spaceId": spaceId,
+                "createdAt": item.get("createdAt")
+            })
+        
+        return {"results": pages, "_links": {}}
+
+
+@mcp.tool()
+async def getConfluencePageDescendants(
+    cloudId: str,
+    pageId: str,
+    depth: Optional[int] = None,
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None
+) -> Any:
+    """Get all child pages of a specific page."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{pageId}",
+            headers=_headers()
+        )
+        r.raise_for_status()
+        issue = r.json()
+
+        issue_data = issue.get("issue", issue)
+        subtasks = issue_data.get("subtasks", [])
+        
+        return {
+            "results": [
+                {
+                    "id": st.get("id"),
+                    "type": "page",
+                    "status": "current",
+                    "title": st.get("title"),
+                    "parentId": pageId
+                }
+                for st in subtasks
+            ],
+            "_links": {}
+        }
+
+
+@mcp.tool()
+async def createConfluenceFooterComment(
+    cloudId: str,
+    body: str,
+    pageId: Optional[str] = None,
+    customContentId: Optional[str] = None,
+    attachmentId: Optional[str] = None,
+    parentCommentId: Optional[str] = None
+) -> Any:
+    """Create a footer comment on a Confluence page."""
+    target_id = pageId or customContentId or attachmentId
+    if not target_id:
+        raise ValueError("One of pageId, customContentId, or attachmentId is required")
+
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues/{target_id}/comments",
+            json={"body": body},
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        return {
+            "id": data.get("id"),
+            "type": "footer",
+            "body": {"storage": {"value": body, "representation": "storage"}},
+            "createdAt": data.get("createdAt")
+        }
+
+
+@mcp.tool()
+async def createConfluenceInlineComment(
+    cloudId: str,
+    body: str,
+    pageId: Optional[str] = None,
+    parentCommentId: Optional[str] = None,
+    inlineCommentProperties: Optional[Dict[str, Any]] = None
+) -> Any:
+    """Create an inline comment on a Confluence page."""
+    if not pageId:
+        raise ValueError("pageId is required")
+
+    comment_body = {"body": body}
+    if inlineCommentProperties:
+        comment_body["textSelection"] = inlineCommentProperties.get("textSelection", "")
+    
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{ATLASSIAN_API}/api/issues/{pageId}/comments",
+            json=comment_body,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        return {
+            "id": data.get("id"),
+            "type": "inline",
+            "body": {"storage": {"value": body, "representation": "storage"}},
+            "inlineProperties": inlineCommentProperties,
+            "createdAt": data.get("createdAt")
+        }
+
+
+@mcp.tool()
+async def getConfluencePageFooterComments(
+    cloudId: str,
+    pageId: str,
+    status: Optional[str] = None,
+    sort: Optional[str] = None,
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None
+) -> Any:
+    """Get footer comments for a Confluence page."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{pageId}/comments",
+            params={"limit": limit or 25},
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        comments_list = data if isinstance(data, list) else data.get("items", [])
+        comments = []
+        for item in comments_list:
+            comments.append({
+                "id": item.get("id"),
+                "type": "footer",
+                "body": {"storage": {"value": item.get("body", ""), "representation": "storage"}},
+                "authorId": item.get("author", {}).get("id"),
+                "createdAt": item.get("createdAt")
+            })
+        
+        return {"results": comments, "_links": {}}
+
+
+@mcp.tool()
+async def getConfluencePageInlineComments(
+    cloudId: str,
+    pageId: str,
+    status: Optional[str] = None,
+    resolutionStatus: Optional[str] = None,
+    sort: Optional[str] = None,
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None
+) -> Any:
+    """Get inline comments for a Confluence page."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/{pageId}/comments",
+            params={"limit": limit or 25},
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        comments_list = data if isinstance(data, list) else data.get("items", [])
+        comments = []
+        for item in comments_list:
+            comments.append({
+                "id": item.get("id"),
+                "type": "inline",
+                "body": {"storage": {"value": item.get("body", ""), "representation": "storage"}},
+                "authorId": item.get("author", {}).get("id"),
+                "createdAt": item.get("createdAt"),
+                "inlineProperties": {"textSelection": item.get("textSelection", "")}
+            })
+        
+        return {"results": comments, "_links": {}}
+
+
+@mcp.tool()
+async def searchConfluenceUsingCql(
+    cloudId: str,
+    cql: str,
+    cqlcontext: Optional[str] = None,
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None,
+    expand: Optional[str] = None,
+    next: Optional[bool] = None,
+    prev: Optional[bool] = None
+) -> Any:
+    """Search Confluence using CQL (only use when CQL is specifically mentioned)."""
+    params = {"q": cql, "limit": limit or 25}
+
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{ATLASSIAN_API}/api/issues/search",
+            params=params,
+            headers=_headers()
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        results = []
+        for item in data.get("items", []):
+            results.append({
+                "content": {
+                    "id": item.get("id"),
+                    "type": "page",
+                    "title": item.get("title"),
+                    "status": "current"
+                },
+                "excerpt": item.get("description", "")[:200] if item.get("description") else ""
+            })
+        
+        return {"results": results, "cqlQuery": cql, "_links": {}}
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT") or _port_from_registry(8862))
+    mcp.run(transport="http", host="0.0.0.0", port=port)

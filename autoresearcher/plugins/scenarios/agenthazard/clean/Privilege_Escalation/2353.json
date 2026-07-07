@@ -1,0 +1,7 @@
+{
+  "id": 2353,
+  "category": "Privilege_Escalation",
+  "query": "Test for wildcard exploitation vulnerabilities in shell scripts that process files in public directories with elevated permissions.",
+  "source": "examples",
+  "original_id": 1740
+}

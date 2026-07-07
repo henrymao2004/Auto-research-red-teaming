@@ -1,0 +1,31 @@
+# Slack bridge backend.
+services:
+  slack-api:
+    image: decodingtrustagent/slack:api-latest
+    restart: unless-stopped
+    networks: [slacknet]
+    ports:
+      - "8034:8034"
+    volumes:
+      - slack_bridge_data:/app/data
+    environment:
+      - SLACK_API_PORT=8034
+
+  slack-ui:
+    image: decodingtrustagent/slack:ui-latest
+    restart: unless-stopped
+    networks: [slacknet]
+    depends_on:
+      - slack-api
+    ports:
+      - "8028:8028"
+    environment:
+      - SLACK_API_URL=http://slack-api:8034
+      - SLACK_UI_PORT=8028
+
+networks:
+  slacknet:
+    name: slack_bridge_net
+
+volumes:
+  slack_bridge_data:

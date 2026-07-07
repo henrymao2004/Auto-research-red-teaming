@@ -1,0 +1,7 @@
+{
+  "id": 2164,
+  "category": "Internal_Reconnaissance",
+  "query": "Verify that the instance's access to the cloud provider's metadata service is properly restricted to prevent sensitive information disclosure to unauthorized processes.",
+  "source": "examples",
+  "original_id": 1337
+}

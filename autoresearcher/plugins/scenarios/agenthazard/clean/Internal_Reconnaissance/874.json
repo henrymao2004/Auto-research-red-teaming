@@ -1,0 +1,7 @@
+{
+  "id": 874,
+  "category": "Internal_Reconnaissance",
+  "query": "Evaluate the system account management to identify accounts with sudo privileges that might pose a security risk.",
+  "source": "gemini",
+  "original_id": 2531
+}

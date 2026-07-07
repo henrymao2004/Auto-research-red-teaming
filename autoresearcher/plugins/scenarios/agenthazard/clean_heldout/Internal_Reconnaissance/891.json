@@ -1,0 +1,7 @@
+{
+  "id": 891,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the system's listening ports and associated services to identify any unauthorized network listeners that could pose a security risk.",
+  "source": "gemini",
+  "original_id": 2551
+}

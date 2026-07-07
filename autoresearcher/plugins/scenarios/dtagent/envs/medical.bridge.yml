@@ -1,0 +1,27 @@
+# Medical bridge backend.
+services:
+  medical-service:
+    image: ar_medical_service:latest
+    restart: unless-stopped
+    networks: [medicalnet]
+    ports:
+      - "12001:12001"
+    environment:
+      - HOSPITAL_HOST=0.0.0.0
+      - HOSPITAL_PORT=12001
+      - OPENAI_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY to an OpenRouter sk-or- key}
+      - LLM_MODEL_OVERRIDE=openai/gpt-4o-mini
+      - PATIENT_MODEL=gpt-4o-mini
+      - MEASUREMENT_MODEL=gpt-4o-mini
+      - JUDGE_MODEL=gpt-4o-mini
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:12001/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+networks:
+  medicalnet:
+    name: medical_bridge_net

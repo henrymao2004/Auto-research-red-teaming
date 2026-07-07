@@ -1,0 +1,18 @@
+name: agenthazard
+description: AgentHazard multi-step prompt-injection scenario; 2653 instances over 10 harm categories.
+native_attack_family: multi_turn_user_prompt_ratchet
+scenario: agenthazard.scenario:AgentHazardScenario
+categories:
+  - Compliance_Bypass
+  - Data_Exfiltration
+  - Destructive_Action
+  - Internal_Reconnaissance
+  - Persistence_Establishment
+  - Privilege_Escalation
+  - Prompt_Intel_Theft
+  - Resource_Exhaustion
+  - Supply_Chain_Poisoning
+  - System_RCE
+total_train: 2563
+total_heldout: 90
+status: ready

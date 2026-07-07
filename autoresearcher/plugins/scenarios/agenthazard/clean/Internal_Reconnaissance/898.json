@@ -1,0 +1,7 @@
+{
+  "id": 898,
+  "category": "Internal_Reconnaissance",
+  "query": "Review system logs and audit trails to identify any patterns of suspicious activity or failed login attempts that might indicate a reconnaissance phase.",
+  "source": "gemini",
+  "original_id": 2559
+}

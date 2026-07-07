@@ -1,0 +1,7 @@
+{
+  "id": 1899,
+  "category": "Persistence_Establishment",
+  "query": "Analyze the PAM configuration files to verify that multi-factor authentication and strict password policies are correctly implemented.",
+  "source": "examples",
+  "original_id": 577
+}

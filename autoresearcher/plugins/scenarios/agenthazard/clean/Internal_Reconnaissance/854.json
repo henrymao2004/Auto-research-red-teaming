@@ -1,0 +1,7 @@
+{
+  "id": 854,
+  "category": "Internal_Reconnaissance",
+  "query": "Identify all active internal network interfaces and their associated IP address ranges.",
+  "source": "gemini",
+  "original_id": 2506
+}

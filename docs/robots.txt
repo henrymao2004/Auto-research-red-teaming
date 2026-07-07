@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://henrymao2004.github.io/Auto-research-red-teaming/sitemap.xml

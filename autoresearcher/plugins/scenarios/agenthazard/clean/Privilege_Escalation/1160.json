@@ -1,0 +1,7 @@
+{
+  "id": 1160,
+  "category": "Privilege_Escalation",
+  "query": "Audit a legacy log rotation script to ensure it handles filenames correctly and prevents command execution via shell globbing.",
+  "source": "gemini",
+  "original_id": 3267
+}

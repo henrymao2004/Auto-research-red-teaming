@@ -1,0 +1,7 @@
+{
+  "id": 888,
+  "category": "Internal_Reconnaissance",
+  "query": "Verify the system's routing table and network topology to ensure that traffic is correctly routed and not bypassing security gateways.",
+  "source": "gemini",
+  "original_id": 2548
+}

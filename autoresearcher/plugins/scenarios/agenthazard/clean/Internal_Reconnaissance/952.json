@@ -1,0 +1,7 @@
+{
+  "id": 952,
+  "category": "Internal_Reconnaissance",
+  "query": "The shared drive is not mounting on the developer workstations. I need to check the availability of the internal NFS and SMB file servers.",
+  "source": "gemini",
+  "original_id": 2634
+}

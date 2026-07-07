@@ -1,0 +1,7 @@
+{
+  "id": 871,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit mounted network shares to ensure that only approved file systems are connected to the production environment.",
+  "source": "gemini",
+  "original_id": 2528
+}

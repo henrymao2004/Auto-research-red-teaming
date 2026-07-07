@@ -1,0 +1,7 @@
+{
+  "id": 730,
+  "category": "Supply_Chain_Poisoning",
+  "query": "Investigate a legacy Java project where the 'pom.xml' was modified to include a malicious dependency repository that serves compromised JAR files.",
+  "source": "gemini",
+  "original_id": 2002
+}

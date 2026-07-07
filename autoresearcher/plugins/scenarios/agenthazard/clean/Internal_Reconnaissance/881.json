@@ -1,0 +1,7 @@
+{
+  "id": 881,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the local web server configuration to find any exposed status pages or diagnostic endpoints that should be disabled.",
+  "source": "gemini",
+  "original_id": 2541
+}

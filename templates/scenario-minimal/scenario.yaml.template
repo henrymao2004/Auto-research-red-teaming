@@ -1,0 +1,7 @@
+name: example_scenario
+description: Minimal scenario template.
+native_attack_family: multi_turn_user_prompt_ratchet
+scenario: example_scenario.scenario:ExampleScenario
+categories:
+  - general
+status: scaffold

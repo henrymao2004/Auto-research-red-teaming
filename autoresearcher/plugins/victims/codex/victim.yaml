@@ -1,0 +1,10 @@
+name: codex
+description: OpenAI codex CLI running inside a Docker sandbox (deepseek via OpenRouter).
+default_model: deepseek-v4-pro
+victim: codex.adapter:CodexAdapter
+docker_image: ar_codex:latest
+supports_attack_families:
+  - multi_turn
+  - multi_turn_user_prompt_ratchet
+  - indirect_prompt_injection
+status: ready

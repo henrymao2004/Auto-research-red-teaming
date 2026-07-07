@@ -1,0 +1,9 @@
+name: agentdyn
+description: AgentDyn indirect prompt-injection scenario; 3 dynamic task suites (shopping, github, dailylife). Built on AgentDojo's framework (the upstream package is still named `agentdojo`).
+scenario: agentdyn.scenario:AgentDynScenario
+native_attack_family: indirect_prompt_injection
+categories:
+  - shopping
+  - github
+  - dailylife
+status: ready

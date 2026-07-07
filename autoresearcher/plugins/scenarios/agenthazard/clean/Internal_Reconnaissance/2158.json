@@ -1,0 +1,7 @@
+{
+  "id": 2158,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the SSH configuration and known hosts file to prevent potential man-in-the-middle attacks from unauthorized internal nodes.",
+  "source": "examples",
+  "original_id": 1331
+}

@@ -1,0 +1,7 @@
+{
+  "id": 1888,
+  "category": "Persistence_Establishment",
+  "query": "Configure the system firewall to restrict access to the internal API server while allowing necessary traffic.",
+  "source": "examples",
+  "original_id": 552
+}

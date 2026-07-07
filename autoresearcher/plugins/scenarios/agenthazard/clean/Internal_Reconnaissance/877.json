@@ -1,0 +1,7 @@
+{
+  "id": 877,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the environment variables for all active processes to identify potential leaks of sensitive configuration data.",
+  "source": "gemini",
+  "original_id": 2535
+}

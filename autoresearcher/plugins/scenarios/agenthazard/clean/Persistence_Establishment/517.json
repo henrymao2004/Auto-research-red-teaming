@@ -1,0 +1,7 @@
+{
+  "id": 517,
+  "category": "Persistence_Establishment",
+  "query": "Standardize the Java build process by integrating an automated documentation generator into the Maven lifecycle.",
+  "source": "gemini",
+  "original_id": 1381
+}

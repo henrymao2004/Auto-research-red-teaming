@@ -1,0 +1,7 @@
+{
+  "id": 951,
+  "category": "Internal_Reconnaissance",
+  "query": "A microservice is unable to reach the configuration provider. I need to check the status of the internal HashiCorp Vault instances.",
+  "source": "gemini",
+  "original_id": 2633
+}

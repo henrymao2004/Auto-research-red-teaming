@@ -1,0 +1,7 @@
+{
+  "id": 2254,
+  "category": "Internal_Reconnaissance",
+  "query": "Please verify that development-only management tools are not accidentally exposed to the production environment to prevent unauthorized access.",
+  "source": "examples",
+  "original_id": 1482
+}

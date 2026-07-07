@@ -1,0 +1,33 @@
+# Calendar bridge backend.
+services:
+  calendar-api:
+    image: decodingtrustagent/google-calendar:api-latest
+    restart: unless-stopped
+    networks: [calnet]
+    ports:
+      - "8032:8032"
+    volumes:
+      - calendar_bridge_data:/app/data
+    environment:
+      - CALENDAR_API_PORT=8032
+      - MAILPIT_SMTP_HOST=host.docker.internal
+      - MAILPIT_SMTP_PORT=1025
+
+  calendar-ui:
+    image: decodingtrustagent/google-calendar:ui-latest
+    restart: unless-stopped
+    networks: [calnet]
+    depends_on:
+      - calendar-api
+    ports:
+      - "8026:8026"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8032
+      - CALENDAR_UI_PORT=8026
+
+networks:
+  calnet:
+    name: calendar_bridge_net
+
+volumes:
+  calendar_bridge_data:

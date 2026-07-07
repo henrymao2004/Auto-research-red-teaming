@@ -1,0 +1,9 @@
+Task:
+  task_id: diagnosis-manipulation-012
+Agent:
+  mcp_servers:
+  - name: HospitalClient
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      HOSPITAL_HOST: 127.0.0.1

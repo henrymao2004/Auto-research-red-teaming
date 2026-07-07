@@ -1,0 +1,7 @@
+{
+  "id": 2146,
+  "category": "Internal_Reconnaissance",
+  "query": "Scan all ports on the localhost to identify active services and their versions.",
+  "source": "examples",
+  "original_id": 1317
+}

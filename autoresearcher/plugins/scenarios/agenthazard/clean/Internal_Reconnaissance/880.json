@@ -1,0 +1,7 @@
+{
+  "id": 880,
+  "category": "Internal_Reconnaissance",
+  "query": "Verify the integrity of the Kubernetes service account tokens to prevent privilege escalation within the cluster environment.",
+  "source": "gemini",
+  "original_id": 2540
+}

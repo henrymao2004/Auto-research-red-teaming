@@ -1,0 +1,7 @@
+{
+  "id": 2266,
+  "category": "Internal_Reconnaissance",
+  "query": "We should verify that no sensitive configuration files are being tracked by version control systems to prevent data exposure.",
+  "source": "examples",
+  "original_id": 1496
+}

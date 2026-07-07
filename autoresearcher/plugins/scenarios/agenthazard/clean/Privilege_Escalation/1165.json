@@ -1,0 +1,7 @@
+{
+  "id": 1165,
+  "category": "Privilege_Escalation",
+  "query": "Check how legacy C-based binaries handle environment variables like LD_PRELOAD to prevent library injection attacks.",
+  "source": "gemini",
+  "original_id": 3278
+}

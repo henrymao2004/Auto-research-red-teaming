@@ -1,0 +1,7 @@
+{
+  "id": 954,
+  "category": "Internal_Reconnaissance",
+  "query": "The database connection pool is exhausted, causing application errors. I need to verify the status of the database cluster nodes and their network listeners.",
+  "source": "gemini",
+  "original_id": 2638
+}

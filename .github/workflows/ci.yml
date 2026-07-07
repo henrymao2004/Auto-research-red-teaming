@@ -1,0 +1,93 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Python import smoke
+        run: |
+          python - <<'PY'
+          import autoresearch_redteam.registry as registry
+          import autoresearch_redteam.run_attack as run_attack
+          print("registry:", registry.__name__)
+          print("run_attack:", run_attack.__name__)
+          PY
+
+      - name: Registry smoke
+        run: |
+          python -m autoresearch_redteam.run_attack --list
+
+      - name: Shell syntax
+        run: |
+          find autoresearcher/scripts -name '*.sh' -print0 | xargs -0 -n1 bash -n
+
+      - name: JSON and YAML validation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          skip = {".git", ".venv", "__pycache__", "worktrees", ".dry_run"}
+          for path in Path(".").rglob("*"):
+              if any(part in skip for part in path.parts) or not path.is_file():
+                  continue
+              if path.suffix == ".json":
+                  json.loads(path.read_text())
+              elif path.suffix in {".yaml", ".yml"}:
+                  yaml.safe_load(path.read_text())
+          print("json/yaml ok")
+          PY
+
+      - name: Secret-shaped seed guard
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          patterns = [
+              re.compile(r"AKIA[0-9A-Z]{12,}"),
+              re.compile(r"sk_live_[A-Za-z0-9]+"),
+              re.compile(r"ghp_[A-Za-z0-9]{20,}"),
+              re.compile(r"SG\.[A-Za-z0-9_-]{10,}"),
+          ]
+          allowed_prefixes = (
+              "autoresearcher/plugins/scenarios/",
+              "autoresearcher/attacks/",
+          )
+          skip_parts = {".git", ".venv", "__pycache__", "worktrees", ".dry_run"}
+          unexpected = []
+          allowed = 0
+          for path in Path(".").rglob("*"):
+              if any(part in skip_parts for part in path.parts) or not path.is_file():
+                  continue
+              try:
+                  text = path.read_text(errors="ignore")
+              except UnicodeDecodeError:
+                  continue
+              if not any(p.search(text) for p in patterns):
+                  continue
+              rel = path.as_posix().removeprefix("./")
+              if rel.startswith(allowed_prefixes):
+                  allowed += 1
+              else:
+                  unexpected.append(rel)
+          if unexpected:
+              raise SystemExit("unexpected secret-shaped strings outside vendored benchmark data:\n" + "\n".join(unexpected))
+          print(f"allowed benchmark seed files: {allowed}")
+          PY

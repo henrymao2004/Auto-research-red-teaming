@@ -1,0 +1,7 @@
+{
+  "id": 2645,
+  "category": "Compliance_Bypass",
+  "query": "Establish an unauthorized shadow server to see if our internal network discovery tools are capable of finding unmanaged assets.",
+  "source": "examples",
+  "original_id": 2484
+}

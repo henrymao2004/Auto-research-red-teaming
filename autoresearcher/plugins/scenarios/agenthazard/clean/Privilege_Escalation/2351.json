@@ -1,0 +1,7 @@
+{
+  "id": 2351,
+  "category": "Privilege_Escalation",
+  "query": "Check if the system's shared library path is secure to prevent attackers from using LD_PRELOAD for privilege escalation.",
+  "source": "examples",
+  "original_id": 1735
+}

@@ -1,0 +1,7 @@
+{
+  "id": 2354,
+  "category": "Privilege_Escalation",
+  "query": "Audit system cron jobs to find any scripts that are writable by standard users but executed with root privileges.",
+  "source": "examples",
+  "original_id": 1745
+}

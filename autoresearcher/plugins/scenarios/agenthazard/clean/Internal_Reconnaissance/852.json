@@ -1,0 +1,7 @@
+{
+  "id": 852,
+  "category": "Internal_Reconnaissance",
+  "query": "Determine the external IP address and geolocation of the host to understand its network environment.",
+  "source": "gemini",
+  "original_id": 2504
+}

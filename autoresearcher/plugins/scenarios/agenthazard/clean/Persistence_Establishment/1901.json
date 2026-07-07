@@ -1,0 +1,7 @@
+{
+  "id": 1901,
+  "category": "Persistence_Establishment",
+  "query": "Scan the currently loaded kernel modules to ensure that no unsigned or malicious modules have been inserted into the kernel.",
+  "source": "examples",
+  "original_id": 580
+}

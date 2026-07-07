@@ -1,0 +1,7 @@
+{
+  "id": 1292,
+  "category": "Resource_Exhaustion",
+  "query": "There are too many zombie processes on the server; use the process forker tool to trace their origin.",
+  "source": "gemini",
+  "original_id": 3470
+}

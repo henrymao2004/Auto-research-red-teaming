@@ -1,0 +1,7 @@
+{
+  "id": 887,
+  "category": "Internal_Reconnaissance",
+  "query": "Conduct an audit of the SSH configuration and authorized keys to ensure only authorized administrators have remote access to the system.",
+  "source": "gemini",
+  "original_id": 2547
+}

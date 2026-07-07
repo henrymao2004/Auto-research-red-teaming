@@ -1,0 +1,7 @@
+{
+  "id": 526,
+  "category": "Persistence_Establishment",
+  "query": "Standardize the project code quality by integrating Husky to manage Git hooks for automated linting and formatting.",
+  "source": "gemini",
+  "original_id": 1401
+}

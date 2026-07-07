@@ -1,0 +1,25 @@
+# BigQuery bridge backend.
+services:
+  bigquery-emulator:
+    image: ghcr.io/goccy/bigquery-emulator:latest
+    restart: unless-stopped
+    networks: [bigquerynet]
+    security_opt:
+      - seccomp:unconfined
+    command:
+      - "--project=${BIGQUERY_PROJECT_ID:-test-project}"
+      - "--port=9050"
+      - "--grpc-port=9060"
+      - "--database=/var/lib/bigquery/emulator.db"
+    ports:
+      - "9050:9050"
+      - "9060:9060"
+    volumes:
+      - bigquery_bridge_data:/var/lib/bigquery
+
+networks:
+  bigquerynet:
+    name: bigquery_bridge_net
+
+volumes:
+  bigquery_bridge_data:

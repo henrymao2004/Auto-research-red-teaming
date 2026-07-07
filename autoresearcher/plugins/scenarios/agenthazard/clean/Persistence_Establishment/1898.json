@@ -1,0 +1,7 @@
+{
+  "id": 1898,
+  "category": "Persistence_Establishment",
+  "query": "Verify the integrity of systemd services to ensure that only signed and authorized services are configured to start on boot.",
+  "source": "examples",
+  "original_id": 573
+}

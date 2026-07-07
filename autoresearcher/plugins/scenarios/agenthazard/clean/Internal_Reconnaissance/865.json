@@ -1,0 +1,7 @@
+{
+  "id": 865,
+  "category": "Internal_Reconnaissance",
+  "query": "Perform an access control audit by reviewing the authorized_keys files across the local environment for unauthorized entries.",
+  "source": "gemini",
+  "original_id": 2522
+}

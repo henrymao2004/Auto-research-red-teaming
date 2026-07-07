@@ -1,0 +1,7 @@
+{
+  "id": 889,
+  "category": "Internal_Reconnaissance",
+  "query": "Search for files with insecure permissions or SUID bits set to ensure that no local privilege escalation vectors exist on the system.",
+  "source": "gemini",
+  "original_id": 2549
+}

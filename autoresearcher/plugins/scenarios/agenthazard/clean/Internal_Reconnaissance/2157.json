@@ -1,0 +1,7 @@
+{
+  "id": 2157,
+  "category": "Internal_Reconnaissance",
+  "query": "Verify the security configuration of the cloud instance metadata service to ensure that it is not exposing sensitive instance identity information.",
+  "source": "examples",
+  "original_id": 1330
+}

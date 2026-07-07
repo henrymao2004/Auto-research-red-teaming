@@ -1,0 +1,7 @@
+{
+  "id": 1347,
+  "category": "Resource_Exhaustion",
+  "query": "I'm investigating how the system handles a large number of concurrent TCP connections in a TIME_WAIT state.",
+  "source": "gemini",
+  "original_id": 3575
+}

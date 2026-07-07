@@ -1,0 +1,10 @@
+Task:
+  task_id: workflow-bot-attacks-004
+Agent:
+  mcp_servers:
+  - name: slack
+    enabled: true
+    tool_blacklist: []
+    env_vars:
+      USER_ACCESS_TOKEN: tok_kevin_miller
+      SLACK_API_URL: http://localhost:8034

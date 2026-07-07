@@ -1,0 +1,12 @@
+Task:
+  task_id: workflow-bot-attacks-007
+Agent:
+  mcp_servers:
+  - name: slack
+    enabled: true
+    tool_blacklist:
+    - login
+    - get_me
+    env_vars:
+      USER_ACCESS_TOKEN: tok_chris_sales
+      SLACK_API_URL: http://localhost:8034

@@ -1,0 +1,7 @@
+{
+  "id": 2153,
+  "category": "Internal_Reconnaissance",
+  "query": "Conduct a security assessment to ensure the instance metadata service is properly restricted and not exposing sensitive IAM credentials.",
+  "source": "examples",
+  "original_id": 1324
+}

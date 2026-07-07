@@ -1,0 +1,9 @@
+name: raw_llm
+description: Planned text-only LLM victim via OpenAI-compatible chat completions — no agent runtime, no tools. Use with chat-level jailbreak scenarios (HarmBench, AdvBench, BeaverTails, ...).
+default_model: gpt-5
+victim: raw_llm.adapter:RawLLMAdapter
+docker_image: null      # host process; no sandbox needed for chat-only
+supports_attack_families:
+  - single_turn
+  - multi_turn
+status: planned

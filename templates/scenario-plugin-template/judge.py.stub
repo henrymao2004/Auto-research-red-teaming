@@ -1,0 +1,80 @@
+"""Judge stub for {scenario_name}.
+
+Implement the judge logic the architect / importer captured during
+interview (contract.yaml::judge gives you `type`, `rule`, optional
+`prompt_template`). The framework only fixes the **interface** —
+function signature + return shape — not the *kind* of judge.
+
+You can write anything: LLM call against ``judge/<rule>.md``, pure
+function-call match, regex / exact string, environment-state diff,
+multi-pass cross-check, whatever the scenario needs.
+
+Reference implementations shipping in this repo:
+- ``plugins/scenarios/agenthazard/judge.py`` — LLM-prompt judge that
+  loads ``judge/agenthazard_official.md`` and calls JUDGE_BASE_URL.
+- ``plugins/scenarios/agentdyn/judge.py`` — pure function-call-match
+  against an instance's ground-truth tool calls.
+
+----------------------------------------------------------------
+INTERFACE CONTRACT
+----------------------------------------------------------------
+``judge_trajectory(instance, trajectory_payload, **kwargs) -> dict``
+
+inputs:
+  instance : dict
+      The full instance dict as loaded from ``judge_data.json``
+      (includes researcher-visible + evaluator-only fields).
+  trajectory_payload : dict
+      The trajectory_payload from the victim adapter's ``run()``.
+      Standard keys: ``tool_calls`` (list), ``assistant_messages``
+      (list), ``reasoning`` (str | None), ``final_text`` (str),
+      ``result_meta`` (dict), ``error`` (str | None).
+
+      IMPORTANT: the victim runner is the source of truth for observed
+      tool-call shape. Entries in ``trajectory_payload["tool_calls"]``
+      are canonicalized as:
+
+          {"name": "<tool name>", "arguments": {...}, "id": "..."}
+
+      Future pure-logic judges should read ``name`` and ``arguments``.
+      If an upstream benchmark stores evaluator-only ground truth as
+      ``function`` / ``args``, convert the observed runner call to
+      ``name`` / ``arguments`` first and compare against that canonical
+      shape. Do not make new judges depend on observed
+      ``function`` / ``args`` fields. Use
+      ``autoresearch_redteam.tool_calls.normalize_observed_tool_call``
+      for this normalization.
+  judge_model / api_key / base_url : optional overrides for LLM-
+      based judges (ignored by pure-logic judges).
+
+output (dict, required keys):
+  harmful  : bool   — overall break verdict
+  score    : int    — 0-10 (or any int scale your contract picks)
+  reason   : str    — 1-3 sentences explaining the verdict
+  model    : str    — model name for audit (``"function_call_match"``
+                       or ``"none"`` for non-LLM judges)
+  protocol : str    — ``"openai"`` / ``"anthropic"`` / ``"none"``
+
+output (dict, optional keys):
+  raw      : str    — verbatim LLM response (for LLM judges)
+  metrics  : dict   — any extra metrics the scenario tracks
+                       (targeted_asr, utility, env_diff, ...)
+"""
+from __future__ import annotations
+
+from typing import Any
+
+
+def judge_trajectory(
+    instance: dict[str, Any],
+    trajectory_payload: dict[str, Any],
+    *,
+    judge_model: str | None = None,
+    api_key: str | None = None,
+    base_url: str | None = None,
+) -> dict[str, Any]:
+    raise NotImplementedError(
+        "Implement judge_trajectory for {scenario_name}. "
+        "See module docstring for the interface contract and "
+        "reference implementations under plugins/scenarios/*/judge.py."
+    )

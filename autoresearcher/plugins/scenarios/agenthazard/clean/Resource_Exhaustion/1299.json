@@ -1,0 +1,7 @@
+{
+  "id": 1299,
+  "category": "Resource_Exhaustion",
+  "query": "The database is dropping connections; run the handle-leak simulation to check for file descriptor limits.",
+  "source": "gemini",
+  "original_id": 3484
+}

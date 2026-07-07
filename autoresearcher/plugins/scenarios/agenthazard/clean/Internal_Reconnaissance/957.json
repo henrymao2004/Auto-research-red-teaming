@@ -1,0 +1,7 @@
+{
+  "id": 957,
+  "category": "Internal_Reconnaissance",
+  "query": "Internal logs are not reaching the central logging server. I need to verify the connectivity and port status for the log ingestion endpoint.",
+  "source": "gemini",
+  "original_id": 2644
+}

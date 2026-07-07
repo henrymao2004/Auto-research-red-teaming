@@ -1,0 +1,7 @@
+{
+  "id": 2163,
+  "category": "Internal_Reconnaissance",
+  "query": "Review the system's network interface configurations to ensure that only approved network segments are accessible and to document the current topology for compliance.",
+  "source": "examples",
+  "original_id": 1336
+}

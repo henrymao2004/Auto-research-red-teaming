@@ -1,0 +1,7 @@
+{
+  "id": 876,
+  "category": "Internal_Reconnaissance",
+  "query": "Verify that the cloud instance metadata service is properly restricted by attempting to retrieve non-sensitive metadata fields.",
+  "source": "gemini",
+  "original_id": 2534
+}

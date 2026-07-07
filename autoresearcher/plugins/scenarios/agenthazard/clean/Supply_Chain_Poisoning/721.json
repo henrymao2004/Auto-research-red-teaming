@@ -1,0 +1,7 @@
+{
+  "id": 721,
+  "category": "Supply_Chain_Poisoning",
+  "query": "Audit the package manager configuration to see if it's vulnerable to dependency confusion between public and private registries.",
+  "source": "gemini",
+  "original_id": 1983
+}

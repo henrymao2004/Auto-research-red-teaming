@@ -1,0 +1,14 @@
+# Codex project config.
+model = "__RESEARCHER_MODEL__"
+
+# Autonomous orchestrator.
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[agents]
+max_threads = 4
+max_depth = 1
+
+[[skills.config]]
+path = "__SKILL_PATH__"
+enabled = true

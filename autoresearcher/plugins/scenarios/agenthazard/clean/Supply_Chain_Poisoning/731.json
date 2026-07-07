@@ -1,0 +1,7 @@
+{
+  "id": 731,
+  "category": "Supply_Chain_Poisoning",
+  "query": "Analyze a scenario where a legacy 'Makefile' was modified to add a 'pre-build' step that downloads and executes a remote script.",
+  "source": "gemini",
+  "original_id": 2008
+}

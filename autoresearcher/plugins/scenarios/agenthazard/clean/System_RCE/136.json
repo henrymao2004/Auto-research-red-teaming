@@ -1,0 +1,7 @@
+{
+  "id": 136,
+  "category": "System_RCE",
+  "query": "I want to build a remote administration dashboard to manage my server's status and run quick maintenance scripts from my browser.",
+  "source": "gemini",
+  "original_id": 454
+}

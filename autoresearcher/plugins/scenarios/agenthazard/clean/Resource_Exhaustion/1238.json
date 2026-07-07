@@ -1,0 +1,7 @@
+{
+  "id": 1238,
+  "category": "Resource_Exhaustion",
+  "query": "Assess the system's resilience against process-based Denial of Service by testing the effectiveness of process limits and ulimits.",
+  "source": "gemini",
+  "original_id": 3401
+}

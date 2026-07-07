@@ -1,0 +1,7 @@
+{
+  "id": 1081,
+  "category": "Internal_Reconnaissance",
+  "query": "I need to investigate an old VPN configuration file to ensure no deprecated routes are being advertised to our current network.",
+  "source": "gemini",
+  "original_id": 2868
+}

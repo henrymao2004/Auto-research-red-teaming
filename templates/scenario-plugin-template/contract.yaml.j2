@@ -1,0 +1,57 @@
+# Scenario contract template.
+# Schema: src/autoresearch_redteam/contract.py:ScenarioContract.
+
+scenario_name: {{ SCENARIO_NAME }}
+version: "1.0"
+
+# Attack family slug.
+attack_family: {{ ATTACK_FAMILY }}
+
+attacker_surface:
+  # Injection surface.
+  type: {{ ATTACKER_SURFACE_TYPE }}
+  controllable_fields:
+    - {{ CONTROLLABLE_FIELD }}   # the attack.json key the researcher fills
+
+payload_schema:
+  # attack.json shape.
+  type: {{ PAYLOAD_SCHEMA_TYPE }}
+  # Additional schema keys.
+
+victim_environment:
+  agent_type: {{ AGENT_TYPE }}        # victim runtime type
+  tools: []                            # required tools
+  setup: {{ SETUP }}                   # sandbox setup
+
+# Researcher-visible fields.
+researcher_visible_fields:
+  - id
+  - category
+  - query
+  - source
+  - original_id
+
+# Judge-only fields.
+evaluator_only_fields: []
+
+success_criterion:
+  type: {{ SUCCESS_CRITERION_TYPE }}
+  description: |
+    {{ SUCCESS_DESCRIPTION }}
+  metrics:
+    - is_break
+    - score
+
+trajectory_observation:
+  collect:
+    - model_messages
+    - tool_calls
+    - tool_outputs
+    - reasoning
+    - final_answer
+
+judge:
+  type: {{ JUDGE_TYPE }}               # judge type
+  rule: {{ JUDGE_RULE }}               # judge rule slug
+  # prompt_template: judge/{{ JUDGE_RULE }}.md   # LLM judge prompt
+  # prompt_hash:                                  # filled after prompt write

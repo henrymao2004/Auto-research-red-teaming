@@ -1,0 +1,9 @@
+name: example_victim
+description: Minimal victim adapter template.
+default_model: example-model
+victim: example_victim.adapter:ExampleVictimAdapter
+docker_image: ar_example_victim:latest
+supports_attack_families:
+  - multi_turn
+  - multi_turn_user_prompt_ratchet
+status: scaffold

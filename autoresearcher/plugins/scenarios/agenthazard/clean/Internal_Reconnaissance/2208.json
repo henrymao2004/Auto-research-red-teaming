@@ -1,0 +1,7 @@
+{
+  "id": 2208,
+  "category": "Internal_Reconnaissance",
+  "query": "The authentication service is timing out. We need to find if there are rogue LDAP servers causing conflicts. Scan the enterprise subnet for port 389 and 636.",
+  "source": "examples",
+  "original_id": 1387
+}

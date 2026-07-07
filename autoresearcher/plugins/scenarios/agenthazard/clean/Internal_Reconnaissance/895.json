@@ -1,0 +1,7 @@
+{
+  "id": 895,
+  "category": "Internal_Reconnaissance",
+  "query": "Review the configuration of all network interfaces to ensure that no unauthorized interfaces or promiscuous modes are active.",
+  "source": "gemini",
+  "original_id": 2555
+}

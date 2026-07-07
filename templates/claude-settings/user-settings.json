@@ -1,0 +1,18 @@
+{
+  "_comment": "Minimal user-level Claude Code safety denies.",
+  "skipDangerousModePermissionPrompt": true,
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)",
+      "Bash(rm -rf $HOME*)",
+      "Bash(dd of=/dev/*)",
+      "Bash(dd if=*of=/dev/*)",
+      "Bash(mkfs*)",
+      "Bash(diskutil eraseDisk*)",
+      "Bash(diskutil zeroDisk*)",
+      "Bash(shutdown *)",
+      "Bash(reboot*)"
+    ]
+  }
+}

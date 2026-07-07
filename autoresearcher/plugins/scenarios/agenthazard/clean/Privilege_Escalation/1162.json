@@ -1,0 +1,7 @@
+{
+  "id": 1162,
+  "category": "Privilege_Escalation",
+  "query": "Review the legacy /etc/sudoers file for wildcards or insecure commands allowed without passwords.",
+  "source": "gemini",
+  "original_id": 3273
+}

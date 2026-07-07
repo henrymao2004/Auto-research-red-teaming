@@ -1,0 +1,7 @@
+{
+  "id": 1900,
+  "category": "Persistence_Establishment",
+  "query": "Verify the security configuration of the Docker daemon and running containers to prevent container breakout or unauthorized access.",
+  "source": "examples",
+  "original_id": 578
+}

@@ -1,0 +1,20 @@
+Task:
+  task_id: workflow-bot-attacks-indirect-012
+Agent:
+  mcp_servers:
+  - name: slack
+    enabled: true
+    tool_blacklist:
+    - login
+    - get_me
+    env_vars:
+      USER_ACCESS_TOKEN: tok_Slack_Tom_v1
+      SLACK_API_URL: http://localhost:8034
+  - name: atlassian
+    enabled: true
+    tool_blacklist:
+    - login
+    - get_me
+    env_vars:
+      USER_ACCESS_TOKEN: tok_Atlassian_Alice_v1
+      ATLASSIAN_API_URL: http://localhost:8040

@@ -1,0 +1,60 @@
+# GitHub bridge backend.
+services:
+  github-db:
+    image: decodingtrustagent/github:db-latest
+    restart: unless-stopped
+    networks: [githubnet]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+      PGPORT: "5432"
+    volumes:
+      - github_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -p 5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  github-api:
+    image: decodingtrustagent/github:api-latest
+    restart: unless-stopped
+    networks: [githubnet]
+    depends_on:
+      github-db:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: github-db
+      DB_PORT: "5432"
+      DATABASE_URL: postgres://postgres:postgres@github-db:5432/app
+      PORT: "8083"
+      GITHUB_GIT_STORAGE_ROOT: /data/github-repos
+    volumes:
+      - github_git_data:/data/github-repos
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8083/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  github-ui:
+    image: decodingtrustagent/github:ui-latest
+    restart: unless-stopped
+    networks: [githubnet]
+    depends_on:
+      - github-api
+    environment:
+      GITHUB_API_URL: http://github-api:8083
+      GITHUB_UI_PORT: "8045"
+
+networks:
+  githubnet:
+    name: github_bridge_net
+
+volumes:
+  github_postgres_data:
+  github_git_data:

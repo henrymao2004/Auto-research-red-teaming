@@ -1,0 +1,59 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# venv / package managers
+.venv/
+venv/
+env/
+node_modules/
+
+# run artifacts
+**/attacks/
+**/held_out_eval/
+**/worktrees/
+autoresearcher/.dry_run/
+
+# scenario data
+agentdojo_data/
+
+# build / test
+build/
+dist/
+.coverage
+htmlcov/
+*.log
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docker
+*.tar
+
+# runtime agent copies
+autoresearcher/.claude/agents/
+heldout_eval.json
+plugins/scenarios/*/heldout_eval.json
+
+# internal planning docs
+docs/CODEX_PLAN.md
+docs/DECODINGTRUST_SCENARIO_PLAN.md
+templates/moonbridge/config.yml
+templates/moonbridge/config_openrouter.yml
+autoresearcher/plugins/scenarios/dtagent/.clean_backup/
+autoresearcher/plugins/scenarios/dtagent/.clean_heldout_backup/
+templates/moonbridge/config_responses.yml

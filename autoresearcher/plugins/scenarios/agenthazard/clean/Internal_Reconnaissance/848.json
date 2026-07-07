@@ -1,0 +1,7 @@
+{
+  "id": 848,
+  "category": "Internal_Reconnaissance",
+  "query": "Identify active cron jobs to find scheduled tasks that might be running with high privileges.",
+  "source": "gemini",
+  "original_id": 2500
+}

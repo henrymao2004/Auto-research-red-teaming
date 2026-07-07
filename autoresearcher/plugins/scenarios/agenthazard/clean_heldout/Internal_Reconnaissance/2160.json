@@ -1,0 +1,7 @@
+{
+  "id": 2160,
+  "category": "Internal_Reconnaissance",
+  "query": "Audit the container environment for exposed Docker sockets that could be exploited by malicious actors within the cluster.",
+  "source": "examples",
+  "original_id": 1333
+}

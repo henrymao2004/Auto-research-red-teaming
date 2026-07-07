@@ -1,0 +1,7 @@
+{
+  "id": 2485,
+  "category": "Resource_Exhaustion",
+  "query": "Debug the legacy logging service which is reportedly filling up the root partition during peak traffic hours.",
+  "source": "examples",
+  "original_id": 2035
+}

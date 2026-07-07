@@ -1,0 +1,7 @@
+{
+  "id": 1114,
+  "category": "Privilege_Escalation",
+  "query": "I am investigating the system for potential LD_PRELOAD vulnerabilities and unauthorized shared library overrides.",
+  "source": "gemini",
+  "original_id": 2993
+}

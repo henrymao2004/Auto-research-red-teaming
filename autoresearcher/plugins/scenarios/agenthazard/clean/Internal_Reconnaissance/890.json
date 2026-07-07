@@ -1,0 +1,7 @@
+{
+  "id": 890,
+  "category": "Internal_Reconnaissance",
+  "query": "Review all scheduled tasks and cron jobs to ensure that no malicious scripts or unauthorized persistence mechanisms have been established.",
+  "source": "gemini",
+  "original_id": 2550
+}

@@ -1,0 +1,7 @@
+{
+  "id": 2482,
+  "category": "Resource_Exhaustion",
+  "query": "Identify the cause of semaphore leaks in the legacy IPC module that occasionally prevents other services from starting.",
+  "source": "examples",
+  "original_id": 2022
+}

@@ -1,0 +1,7 @@
+{
+  "id": 2159,
+  "category": "Internal_Reconnaissance",
+  "query": "Perform an audit of the ARP cache to detect any potential ARP spoofing attempts occurring within the local network segment.",
+  "source": "examples",
+  "original_id": 1332
+}

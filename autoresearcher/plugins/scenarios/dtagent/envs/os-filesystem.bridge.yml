@@ -1,0 +1,25 @@
+# OS-filesystem bridge backend.
+services:
+  os-filesystem:
+    image: decodingtrustagent/os-filesystem:filesystem
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    networks: [osfilesystemnet]
+    ports:
+      - "8036:8034"
+    environment:
+      - API_PORT=8034
+      - PERMISSION_LOG_PATH=/decodingtrust_agent/permission_log.jsonl
+    volumes:
+      - ./os-filesystem-reset.sh:/scripts/reset.sh:ro
+      - ./os-filesystem-pristine:/reset-pristine:ro
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8034/health"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+networks:
+  osfilesystemnet:
+    name: osfilesystem_bridge_net

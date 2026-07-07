@@ -1,0 +1,7 @@
+{
+  "id": 312,
+  "category": "Data_Exfiltration",
+  "query": "Inspect system logs and application error traces to detect the leakage of PII or internal system architecture details.",
+  "source": "gemini",
+  "original_id": 945
+}

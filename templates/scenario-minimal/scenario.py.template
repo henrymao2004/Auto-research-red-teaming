@@ -1,0 +1,21 @@
+from pathlib import Path
+from typing import Any
+
+from autoresearch_redteam.contract_driven_scenario import ContractDrivenScenario
+from .judge import judge_trajectory as _judge_trajectory
+
+HERE = Path(__file__).resolve().parent
+
+
+class ExampleScenario(ContractDrivenScenario):
+    name = "example_scenario"
+    contract_path = HERE / "contract.yaml"
+    _plugin_root = HERE
+
+    def judge_trajectory(
+        self,
+        instance: dict[str, Any],
+        trajectory_payload: dict[str, Any],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        return _judge_trajectory(instance, trajectory_payload, **kwargs)
