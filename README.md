@@ -38,6 +38,13 @@ registry-discovered plugin (every scenario is a single `contract.yaml`), so
 you can red-team coding agents, tool-using agents, or prompt-injection
 environments — or import your own benchmark — without rewriting the loop.
 
+## 📢 Latest updates
+
+<!-- Newest first; one line per release with an ISO date. Add a new entry here on every update. -->
+
+- **2026-07-13** — 🚀 Now runs on **Claude Code's latest Workflow feature** — batched-parallel, resumable discovery. [Learn more](autoresearcher/plugins/researchers/default/workflows/README.md).
+- **2026-07-07** — 🎉 Initial public release.
+
 ## 🔬 What AHA finds
 
 Point AHA at a frontier agent overnight and it hands back a **graph of *why*
