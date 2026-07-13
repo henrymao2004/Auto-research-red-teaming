@@ -147,6 +147,11 @@ The pipeline above runs in two stages:
    Reflector, and a periodic Critic — writing a fully inspectable
    `attacks/<run>/v<N>/` folder and promoting only replicated, non-falsified
    breaks into the VCG. A sidecar monitor halts the loop on 10 stop signals.
+   Stage 1 also ships an **optional driver built on Claude Code's latest
+   Workflow orchestration** — it fans a batch of hypotheses out in parallel,
+   folds the VCG serially, and is fully resumable (same sub-agents and
+   contracts, higher throughput); see
+   [`plugins/researchers/default/workflows/`](autoresearcher/plugins/researchers/default/workflows/README.md).
 2. **Stage 2 — held-out evaluation.** `/concept-eval` freezes the counted
    concepts, instantiates each once against an unseen split (via a sandboxed
    `claude -p` isolated from the victim), and reports headline

@@ -581,3 +581,29 @@ container reaches the ~15 live backends via `host.docker.internal:<port>`
 stacks up. This is the egress/network layer — it makes the allowed tools
 usable but does not change which tools are allowed. A backend that is down
 makes a whitelisted tool fail; it does not widen the permission set.
+
+---
+
+## N. Optional Workflow driver — the `aha-discovery` MCP server
+
+The optional Workflow driver (a deterministic, batched-parallel alternative
+to `/loop` + `/autoresearch-redteam-discovery`; see [`USAGE.md`](USAGE.md))
+adds exactly one new host-side component: an MCP server, `aha-discovery`
+(`src/autoresearch_redteam/discovery_mcp.py`), registered per-session via
+`plugins/researchers/default/workflows/.mcp.json`.
+
+It is a **researcher-side** tool, not a victim-side one, and it does not
+widen the victim's action surface:
+
+- Reads `RUN_HINT.md`, `vcg.md`, and the scenario's `clean/` — the same
+  paths the orchestrator itself already reads.
+- Writes only under `attacks/<run>/` (iteration dirs, `vcg.md`,
+  `AGENT_LOG.md`, and `git commit` scoped to `attacks/<run>/`).
+- For the `run_attack` tool it shells out to the existing `run_attack.py`
+  — same per-attack Docker sandbox (Layer 1 above), same 10-min budget,
+  same `--rm` container.
+
+No new victim-facing capability is introduced; the 5 isolation layers in
+§E and the filesystem denies in §D/§K are unchanged. Enable it by
+exporting `AHA_WORKSPACE=<worktree root>` and registering `.mcp.json` for
+the session — the default `/loop` path needs none of this.

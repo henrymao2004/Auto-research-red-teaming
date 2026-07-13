@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "aha-discovery": {
+      "command": "uv",
+      "args": ["run", "-m", "autoresearch_redteam.discovery_mcp"],
+      "env": {
+        "AHA_WORKSPACE": "${AHA_WORKSPACE:-.}"
+      }
+    }
+  }
+}

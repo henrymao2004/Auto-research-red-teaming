@@ -265,6 +265,34 @@ Per-iteration artefacts land in `attacks/first_run01/v<N>/`:
 Every 20 iterations the orchestrator dispatches `redteam-critic`,
 which appends a `## Critic check` block to `AGENT_LOG.md`.
 
+### Optional: run discovery with the Workflow driver
+
+`/loop /autoresearch-redteam-discovery` above is the default driver — one
+model-driven iteration at a time. A deterministic, batched-parallel,
+resumable alternative also ships, for higher throughput or resuming a long
+run after a crash:
+
+1. Launch the run the normal way first (this section), so `RUN_HINT.md`,
+   `attacks/<run>/`, and `clean/` exist in the worktree.
+2. Register the MCP server for the session:
+   ```bash
+   export AHA_WORKSPACE=<worktree root>   # dir containing attacks/ + RUN_HINT.md
+   # put plugins/researchers/default/workflows/.mcp.json on the session's
+   # MCP search path, or:
+   claude mcp add aha-discovery -- uv run -m autoresearch_redteam.discovery_mcp
+   ```
+3. From a Claude Code session in that worktree (needs workflow opt-in):
+   ```
+   Workflow({ scriptPath: "plugins/researchers/default/workflows/aha_discovery.js",
+              args: { run_code: "first_run01", cap: 100 } })
+   ```
+4. Watch progress with `/workflows`; resume after a stop/crash with
+   `Workflow({ scriptPath, resumeFromRunId })`.
+
+Same 4 sub-agents, falsifier, promotion gate, and never-self-stop guarantee
+as the skill path. Full reference:
+[`../autoresearcher/plugins/researchers/default/workflows/README.md`](../autoresearcher/plugins/researchers/default/workflows/README.md).
+
 ## 7. Start the monitor — window 2
 
 **Wait until `v1/` exists**, then in a second terminal:

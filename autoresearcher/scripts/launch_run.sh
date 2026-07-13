@@ -429,6 +429,12 @@ unset ANTHROPIC_API_KEY
 unset ANTHROPIC_BASE_URL
 unset ANTHROPIC_AUTH_TOKEN
 
+# Disable Claude Code auto-memory for the research backbone: discovery is a
+# controlled experiment, so host memory (MEMORY.md) must not leak into the
+# researcher's context across runs. Exported here so every exec path below
+# (OpenRouter, subscription, bare fallback) inherits it.
+export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1
+
 # Launch researcher backbone.
 if [ -n "${RESEARCHER_MODEL:-}" ]; then
     echo ">> researcher backbone: claude on $RESEARCHER_MODEL via $RESEARCHER_BASE_URL"

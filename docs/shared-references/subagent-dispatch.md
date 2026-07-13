@@ -104,3 +104,10 @@ declare the new step → file mapping there.
 
 See `docs/PLUGINS.md` and `plugins/researchers/default/` for the
 researcher-plugin layout.
+
+The optional Workflow driver (`plugins/researchers/default/workflows/aha_discovery.js`)
+dispatches these same four sub-agents via `agent({agentType: ...})` and folds
+the VCG through the deterministic `discovery_mcp.py` tools instead of
+skill-driven prose steps. The file-ownership table, dispatch prompt shape,
+and per-sub-agent invariants above apply unchanged — only the orchestration
+is batched-parallel and resumable.

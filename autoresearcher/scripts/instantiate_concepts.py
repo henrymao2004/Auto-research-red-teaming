@@ -261,6 +261,9 @@ def _claudecode_instantiator_call_model(user_msg: str, model: str) -> str:
         "Bash,Edit,Write,Read,Glob,Grep,WebSearch,WebFetch,Task,NotebookEdit,TodoWrite",
     ]
     env = {k: v for k, v in os.environ.items() if not k.startswith("ANTHROPIC_")}
+    # Anti-cheat: keep host auto-memory (MEMORY.md) out of the single-shot
+    # instantiation context, consistent with the disallowed file/exec tools.
+    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
     last: Exception | None = None
     for attempt in range(_CLI_MAX_RETRIES):
         try:

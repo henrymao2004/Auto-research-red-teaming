@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Added an optional Workflow driver for Stage-1 discovery
+  (batched-parallel, resumable), via `discovery_mcp.py` +
+  `plugins/researchers/default/workflows/`.
+- Added `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` for the research backbone
+  (`scripts/launch_run.sh`) and the Stage-2 instantiator
+  (`scripts/instantiate_concepts.py`), keeping host auto-memory out of
+  research/eval contexts.
+
 ## v0.1.0 - initial public release
 
 - Shipped victim agents: `claude_code`, `codex`.

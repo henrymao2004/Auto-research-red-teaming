@@ -64,7 +64,13 @@ in `AGENT_LOG.md` (Step 8), and git commit messages.
   (`uv run -m autoresearch_redteam.run_attack`, which reads
   `v<N>/attack.json` and writes `result.json` + `trajectory.json`
   under the `--max-input-tokens 500000 --max-output-tokens 50000`
-  budget). Repeated by `/loop`.
+  budget). Repeated by `/loop`. An **optional Workflow driver**
+  (batched-parallel + resumable) can drive this same Stage-1 loop instead
+  of `/loop` — see `plugins/researchers/default/workflows/` (script
+  `aha_discovery.js` + the host-side MCP server
+  `src/autoresearch_redteam/discovery_mcp.py`); it dispatches the same four
+  sub-agents and folds the VCG through deterministic MCP tools, so every
+  contract here is unchanged.
 - `/autoresearch-redteam-monitor <run_code>` — sidecar agent in a 2nd
   claude session that checks 10 stop signals (2 critical-immediate)
   every 15 min. On a stop it writes `attacks/<run_code>/STOP`; the
@@ -111,12 +117,14 @@ plugins/
   │       (each: train.json + heldout.json + clean/ + clean_heldout/ + judge_data.json + convert.py)
   └── researchers/
       ├── default/                          — 4-agent roster (.md agents, Task dispatch)
+      │   └── workflows/                    — optional Workflow driver (aha_discovery.js + .mcp.json + README)
       └── codex/                            — 4-agent roster (.toml agents, native spawn)
 src/autoresearch_redteam/
   ├── registry.py                           — discovers plugins/{victims,scenarios,researchers}/
   ├── protocols.py                          — VictimAdapter / Scenario / ResearcherAgent Protocols
   ├── contract.py / contract_driven_scenario.py — contract-driven scenario plumbing
   ├── run_attack.py                         — per-attack evaluator (discovery Step 4 invokes this)
+  ├── discovery_mcp.py                      — deterministic MCP tools for the optional Workflow driver
   ├── victim_harness.py / tool_calls.py / runtime/  — victim execution
   ├── leaderboard.py / evaluate_concepts.py / concept_rank.py
   └── types.py

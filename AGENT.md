@@ -92,6 +92,7 @@ extra backend stand-up) live in [`docs/QUICKSTART.md`](docs/QUICKSTART.md).
 | **Scenario extend**       | `/scenario-extend "<scenario> + <spec>"`                  | custom attack / env-hydration / interceptor / trajectory / payload kind                 | edits `in_container_runner.py` / `attack_schema` / `tools_mcp.py` / `judge.py`; rebuilds image | Wire a custom dimension (auto-invoked by build / import)     |
 | **Setup**                 | `/setup`                                                  | answers to a few endpoint questions                                                     | `.env` with the endpoint slots (validated)                                            | First-time / re-configure victim / research / judge / generator endpoints |
 | **Discovery (Stage 1)**   | `launch_run.sh` → `/loop /autoresearch-redteam-discovery` | `(victim, scenario, researcher, model)`, outer goal                                     | `attacks/<run>/{vcg.md, AGENT_LOG.md, v<N>/}`                                         | Search for vulnerability concepts on a scenario's Stage-1 set |
+| **Discovery — Workflow driver** (opt.) | `Workflow({scriptPath: "plugins/researchers/default/workflows/aha_discovery.js", args:{run_code}})` | same as Discovery (one VCG snapshot per batch) | same `attacks/<run>/{vcg.md, AGENT_LOG.md, v<N>/}` | Optional batched-parallel + resumable alternative to `/loop` (Claude Code only; same sub-agents + contracts) |
 | **Monitor**               | `/loop 15m /autoresearch-redteam-monitor`                 | `attacks/<run>/`                                                                        | `attacks/<run>/{monitor_log.md, STOP, STOP_REASON.md}`                                | Sidecar; window 2 of every discovery run                     |
 | **Run summary**           | `render_summary.py <run>`                                 | `attacks/<run>/{vcg.md, AGENT_LOG.md}` + `RUN_HINT.md`                                  | `attacks/<run>/SUMMARY.md` (mermaid VCG graph + tables)                               | After discovery stops; human-readable digest for sharing     |
 | **Concept eval (Stage 2)**| `/concept-eval <run>`                                     | `attacks/<run>/vcg.md` + scenario's `heldout.json` (host-side)                          | `held_out_eval/<run>/leaderboard.json`, headline ASR                                  | After discovery stops; one slash command wraps the 4 steps   |
@@ -186,6 +187,11 @@ sub-agent roster the orchestrator dispatches each iteration. Default
 roster (6 sub-agents): the 4 inner-loop agents Hypothesizer /
 Attack-Designer / Reflector / Critic, plus `scenario-architect` and
 `scenario-importer` (which power `/scenario-build` and `/scenario-import`).
+The `default` roster also ships an optional **Workflow driver** at
+`plugins/researchers/default/workflows/` — batched-parallel + resumable
+Stage-1 discovery built on Claude Code's Workflow orchestration (companion
+MCP server `src/autoresearch_redteam/discovery_mcp.py`); Claude Code only,
+and `/loop` remains the default.
 
 **List plugins:** `uv run -m autoresearch_redteam.run_attack --list`.
 

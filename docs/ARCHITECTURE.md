@@ -27,6 +27,19 @@ Step 8   Orchestrator: append iteration row to AGENT_LOG.md
 Step 9   Orchestrator: done → /loop schedules next iter
 ```
 
+This is the **default** driver: the `/autoresearch-redteam-discovery`
+skill run one iteration at a time under `/loop`, entirely model-driven.
+Stage 1 discovery can optionally instead be driven by a deterministic
+**Workflow driver** (`plugins/researchers/default/workflows/aha_discovery.js`)
+— batched-parallel and resumable: it fans K independent proposals per
+batch through the same `[hypothesizer → attack-designer → run_attack →
+reflector]` pipeline, then folds the VCG serially at a batch barrier and
+fires the critic every 10 iters. The mechanical bookkeeping above (STOP
+check, VCG snapshot, selection, fold/promotion, commit) runs as
+deterministic MCP tools (`src/autoresearch_redteam/discovery_mcp.py`)
+rather than orchestrator judgment calls; the falsifier protocol,
+promotion gate, and oracle isolation are unchanged either way.
+
 ## Why the multi-agent split
 
 Single-agent autoresearch (Karpathy 2026, Claudini 2026) works but

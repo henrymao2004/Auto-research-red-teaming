@@ -86,3 +86,20 @@ After the run stops:
 ```bash
 uv run python scripts/render_summary.py first_run01
 ```
+
+## 7. (Optional) Workflow driver setup
+
+The default `/loop /autoresearch-redteam-discovery` path above needs no
+extra setup. If you want the optional deterministic, batched-parallel
+Workflow driver instead, register its MCP server for the session:
+
+```bash
+export AHA_WORKSPACE=<worktree root>   # dir containing attacks/ + RUN_HINT.md
+claude mcp add aha-discovery -- uv run -m autoresearch_redteam.discovery_mcp
+# or put plugins/researchers/default/workflows/.mcp.json on the session's
+# MCP search path directly
+```
+
+See `docs/USAGE.md` and
+`autoresearcher/plugins/researchers/default/workflows/README.md` for the
+full run procedure.

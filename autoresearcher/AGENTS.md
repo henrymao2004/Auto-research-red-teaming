@@ -83,6 +83,11 @@ builds.
   --version <N> --victim <F> --scenario <S> --model <M>
   --max-input-tokens 500000 --max-output-tokens 50000`, which reads
   `v<N>/attack.json` and writes `result.json` + `trajectory.json`.
+  (A batched-parallel **Workflow driver** exists as an optional alternative
+  to `/loop` — see `CLAUDE.md` + `plugins/researchers/default/workflows/` —
+  but it is built on the Claude Code `Workflow` tool, so as a **codex**
+  orchestrator you drive Stage 1 with `/loop` above; the Workflow driver is
+  Claude-Code-only.)
 - `$autoresearch-redteam-monitor <run_code>` — sidecar agent
   checking 10 stop signals (2 critical-immediate) every 15 min; on a
   stop it writes `attacks/<run_code>/STOP` and the discovery skill's

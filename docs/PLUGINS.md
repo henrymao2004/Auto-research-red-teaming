@@ -58,6 +58,14 @@ format follows the orchestrator the researcher runs on: the `default`
 custom agents copied into `.codex/agents/`. Same 4-agent method either
 way — only the orchestration substrate differs.
 
+The `default` researcher plugin also ships an optional `workflows/`
+subdirectory: a deterministic, batched-parallel Workflow driver for
+Stage-1 discovery (`aha_discovery.js` + `.mcp.json`), paired with a
+host-side MCP server, `src/autoresearch_redteam/discovery_mcp.py`, that
+code-ifies the skill's mechanical rules as deterministic tools. It's an
+add, not a replacement — the skill + `/loop` path above remains the
+default. See `plugins/researchers/default/workflows/README.md`.
+
 ## Shipped plugins
 
 ```
@@ -81,6 +89,9 @@ plugins/researchers/
                     6 agents: hypothesizer / attack-designer / reflector / critic +
                     scenario-architect (for /scenario-build) +
                     scenario-importer (for /scenario-import)
+                    workflows/      optional deterministic Workflow driver
+                                    (aha_discovery.js + .mcp.json) for Stage-1
+                                    discovery — see workflows/README.md
   codex/            codex sibling of default (agents/*.toml → .codex/agents/):
                     same 4-agent method, codex native subagent spawn
 ```

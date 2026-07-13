@@ -26,7 +26,9 @@ Stage 2 shells out to the logged-in Claude Code `claude` CLI in print mode
 (`claude -p --output-format json`), model `claude-opus-4-8` (override
 `INSTANTIATOR_CLI_MODEL`), with a lean red-team system prompt and **all
 file/exec/web tools disallowed**
-(`Bash,Edit,Write,Read,Glob,Grep,WebSearch,WebFetch,Task,NotebookEdit,TodoWrite`).
+(`Bash,Edit,Write,Read,Glob,Grep,WebSearch,WebFetch,Task,NotebookEdit,TodoWrite`),
+plus `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` in the sandboxed env — keeping host
+auto-memory (`MEMORY.md`) out of the single-shot instantiation context.
 It uses the host Max subscription and needs no API key. Concurrency is the
 `--workers` count. Adapted from
 `redteam-baselines/tmap/tmap_core.py::AttackerLLM` (claude_cli path).

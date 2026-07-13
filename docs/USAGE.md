@@ -168,6 +168,32 @@ The important user-facing artifacts are `attack.json`, `result.json`,
 held-out pipeline; its schema lives in
 [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
+### Stage 1 — Workflow driver (optional, batched-parallel + resumable)
+
+The `/loop` skill above drives one iteration per turn. For higher throughput
+and resumability, Stage 1 can instead run through an optional **Workflow
+driver** built on Claude Code's Workflow orchestration
+([`plugins/researchers/default/workflows/`](../autoresearcher/plugins/researchers/default/workflows/README.md)).
+Per batch it selects K mutually-independent proposals against one VCG
+snapshot, runs the `[hypothesizer → attack-designer → run_attack → reflector]`
+chain in parallel, then folds the VCG serially — the same four sub-agents,
+falsifier protocol, and promotion gate as the skill path, and it never
+self-stops (only the monitor's `STOP` file, the outer cap, or the token budget
+halts it). The mechanical bookkeeping (select / fold / promote / commit) runs
+as deterministic MCP tools from `discovery_mcp.py`.
+
+Run it after launching a run the normal way:
+
+1. `export AHA_WORKSPACE=<worktree root>` (the dir holding `attacks/` + `RUN_HINT.md`).
+2. Register the MCP server — put `plugins/researchers/default/workflows/.mcp.json`
+   on the session's MCP path, or
+   `claude mcp add aha-discovery -- uv run -m autoresearch_redteam.discovery_mcp`.
+3. `Workflow({ scriptPath: "plugins/researchers/default/workflows/aha_discovery.js", args: { run_code: "<run>", cap: 100 } })`.
+4. Watch with `/workflows`; resume after a stop with `Workflow({ scriptPath, resumeFromRunId })`.
+
+Batch size K is budget-adaptive (2–5). The default `/loop` path needs none of
+this setup.
+
 ### Stage 2 — held-out evaluation via `/concept-eval`
 
 Wraps the 4 raw scripts in one slash command:
