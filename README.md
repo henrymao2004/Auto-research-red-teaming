@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://arxiv.org/abs/TBD"><img src="https://img.shields.io/badge/Paper-arXiv%3ATBD-b31b1b?style=flat&logo=arxiv&logoColor=white" alt="Paper"></a> ·
+  <a href="https://arxiv.org/abs/2607.11698"><img src="https://img.shields.io/badge/Paper-arXiv%3A2607.11698-b31b1b?style=flat&logo=arxiv&logoColor=white" alt="Paper"></a> ·
   <a href="https://henrymao2004.github.io/Auto-research-red-teaming/"><img src="https://img.shields.io/badge/Website-live-ea7278?style=flat&logo=githubpages&logoColor=white" alt="Website"></a> ·
   <a href="https://henrymao2004.github.io/Auto-research-red-teaming/#wall"><img src="https://img.shields.io/badge/Casebook-117%20confirmed%20breaks-ea7278?style=flat" alt="Casebook"></a> ·
   <a href="AGENT.md"><img src="https://img.shields.io/badge/AI%20Agents-AGENT.md-4B2E83?style=flat&logo=readthedocs&logoColor=white" alt="AGENT.md"></a> ·
@@ -42,6 +42,7 @@ environments — or import your own benchmark — without rewriting the loop.
 
 <!-- Newest first; one line per release with an ISO date. Add a new entry here on every update. -->
 
+- **2026-07-13** — 📄 Paper on arXiv: [arXiv:2607.11698](https://arxiv.org/abs/2607.11698).
 - **2026-07-13** — 🚀 Now runs on **Claude Code's latest Workflow feature** — batched-parallel, resumable discovery. [Learn more](autoresearcher/plugins/researchers/default/workflows/README.md).
 - **2026-07-07** — 🎉 Initial public release.
 
@@ -231,13 +232,12 @@ for multimodal jailbreak scenarios).
 ## Citation
 
 ```bibtex
-@misc{mao2026agenthacksagent,
-  title         = {Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming},
-  author        = {Mao, Xutao and Zheng, Xiang and Wang, Cong},
-  year          = {2026},
-  eprint        = {TBD},
-  archivePrefix = {arXiv},
-  url           = {https://arxiv.org/abs/TBD}
+@online{2607.11698,
+Author = {Xutao Mao and Xiang Zheng and Cong Wang},
+Title = {Agent Hacks Agent: Autoresearch for Production-Agent Red-Teaming},
+Year = {2026},
+Eprint = {2607.11698},
+Eprinttype = {arXiv},
 }
 ```
 
