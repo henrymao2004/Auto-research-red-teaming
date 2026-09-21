@@ -3,36 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="title" content="Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming">
-  <meta name="description" content="AHA runs autonomous red-team research against frontier LLM agents and returns reusable vulnerability concepts — why an agent breaks, not one-off prompts. 117 confirmed concepts across 17 model×agent×scenario settings.">
+  <meta name="title" content="Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents">
+  <meta name="description" content="AHA turns automatic red-teaming into autoresearch: 117 counted vulnerability concepts across 18 settings, 47.0% held-out ASR, transfer, composition, and concept-guided patches.">
   <meta name="keywords" content="red-teaming, LLM agents, AI safety, vulnerability concepts, prompt injection, autonomous agents, jailbreak">
-  <meta name="author" content="Xutao Mao, Xiang Zheng, Cong Wang">
+  <meta name="author" content="Xutao Mao, Rui Qian, Xiang Zheng, Cong Wang">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming">
-  <meta property="og:description" content="Frontier agents that surface their own reusable failure mechanisms. 117 confirmed vulnerability concepts, discovered autonomously.">
+  <meta property="og:title" content="Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents">
+  <meta property="og:description" content="117 counted vulnerability concepts across 18 settings. Frozen reuse, transfer, composition, and concept-guided repair.">
   <meta property="og:url" content="https://henrymao2004.github.io/Auto-research-red-teaming/">
-  <meta property="og:site_name" content="Agent Hacks Agent (AHA)">
+  <meta property="og:site_name" content="Agent Hacks Agents (AHA)">
   <meta property="og:image" content="https://henrymao2004.github.io/Auto-research-red-teaming/assets/aha_overview.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming">
-  <meta name="twitter:description" content="Frontier agents that surface their own reusable failure mechanisms. 117 confirmed vulnerability concepts, discovered autonomously.">
+  <meta name="twitter:title" content="Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents">
+  <meta name="twitter:description" content="117 counted vulnerability concepts across 18 settings. Frozen reuse, transfer, composition, and concept-guided repair.">
   <meta name="twitter:image" content="https://henrymao2004.github.io/Auto-research-red-teaming/assets/aha_overview.png">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://henrymao2004.github.io/Auto-research-red-teaming/">
   <meta name="google-site-verification" content="In-pgulllPe3gfC35Xl6Jygsu3H2HafeqhifVw5KdL4">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"ScholarlyArticle","headline":"Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming","name":"Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming","author":[{"@type":"Person","name":"Xutao Mao"},{"@type":"Person","name":"Xiang Zheng"},{"@type":"Person","name":"Cong Wang"}],"description":"AHA runs autonomous red-team research against frontier LLM agents and returns reusable vulnerability concepts (why an agent breaks, not one-off prompts). 117 confirmed concepts across 17 model x agent x scenario settings.","url":"https://henrymao2004.github.io/Auto-research-red-teaming/","sameAs":["https://github.com/henrymao2004/Auto-research-red-teaming","https://arxiv.org/abs/2607.11698"],"identifier":"arXiv:2607.11698","datePublished":"2026-07-13","keywords":["red-teaming","LLM agents","AI safety","vulnerability concepts","prompt injection","autonomous agents"]}
+  {"@context":"https://schema.org","@type":"ScholarlyArticle","headline":"Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents","name":"Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents","author":[{"@type":"Person","name":"Xutao Mao"},{"@type":"Person","name":"Rui Qian"},{"@type":"Person","name":"Xiang Zheng"},{"@type":"Person","name":"Cong Wang"}],"description":"AHA turns automatic red-teaming into autoresearch. 117 counted concepts across 18 settings, 47.0% held-out ASR, transfer, composition, and concept-guided patches.","url":"https://henrymao2004.github.io/Auto-research-red-teaming/","sameAs":["https://github.com/henrymao2004/Auto-research-red-teaming","https://arxiv.org/abs/2607.11698"],"identifier":"arXiv:2607.11698","datePublished":"2026-07-13","keywords":["red-teaming","LLM agents","AI safety","vulnerability concepts","prompt injection","autonomous agents"]}
   </script>
-  <!-- Google Scholar citation tags -->
-  <meta name="citation_title" content="Agent Hacks Agent: Autoresearch for Production-Agent Red-Teaming">
+  <meta name="citation_title" content="Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents">
   <meta name="citation_author" content="Mao, Xutao">
+  <meta name="citation_author" content="Qian, Rui">
   <meta name="citation_author" content="Zheng, Xiang">
   <meta name="citation_author" content="Wang, Cong">
   <meta name="citation_publication_date" content="2026/07/13">
   <meta name="citation_arxiv_id" content="2607.11698">
   <meta name="citation_abstract_html_url" content="https://arxiv.org/abs/2607.11698">
   <meta name="theme-color" content="#ea7278">
-  <title>Agent Hacks Agent: AutoResearch for Production-Agent Red-Teaming</title>
+  <title>Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ea7278'/%3E%3Ctext x='16' y='22.5' font-family='Arial,Helvetica,sans-serif' font-size='21' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="static/css/bulma.min.css">
   <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
@@ -49,14 +49,15 @@
       <div class="columns is-centered">
         <div class="column has-text-centered">
           <p class="aha-kicker">AI-safety · red-teaming</p>
-          <h1 class="title is-1 publication-title">Agent Hacks Agent<span class="aha-tag">AHA</span></h1>
-          <p class="aha-subtitle">AutoResearch for Production-Agent Red-Teaming</p>
+          <h1 class="title is-1 publication-title">Agent Hacks Agents<span class="aha-tag">AHA</span></h1>
+          <p class="aha-subtitle">Autoresearch Discovers Vulnerabilities in Production Agents</p>
           <div class="is-size-5 publication-authors">
-            <span class="author-block"><a href="https://henrymao2004.github.io/" target="_blank" rel="noopener">Xutao Mao</a>,</span>
-            <span class="author-block"><a href="#">Xiang Zheng</a>,</span>
-            <span class="author-block"><a href="#">Cong Wang</a></span>
+            <span class="author-block"><a href="https://henrymao2004.github.io/" target="_blank" rel="noopener">Xutao Mao</a><sup>1</sup>,</span>
+            <span class="author-block">Rui Qian<sup>2</sup>,</span>
+            <span class="author-block">Xiang Zheng<sup>1,*</sup>,</span>
+            <span class="author-block">Cong Wang<sup>1,*</sup></span>
           </div>
-          <p class="aha-affil">City University of Hong Kong</p>
+          <p class="aha-affil"><sup>1</sup> City University of Hong Kong &nbsp;·&nbsp; <sup>2</sup> Fudan University &nbsp;·&nbsp; <sup>*</sup> corresponding</p>
 
           <div class="publication-links">
             <span class="link-block"><a href="https://arxiv.org/abs/2607.11698" target="_blank" class="external-link button is-rounded is-dark">
@@ -78,12 +79,11 @@
   <div class="container is-max-desktop">
     <div class="hero-body">
       <figure>
-        <img src="assets/aha_overview.png" alt="AHA overview: an autoresearch loop turns red-team trajectories into a frozen, reusable Vulnerability Concept Graph, evaluated single-shot on held-out tasks and transferred across scenarios and victim models.">
-        <figcaption>An autoresearch loop turns trajectories into a frozen, <b>reusable Vulnerability Concept Graph</b> — evaluated single-shot on held-out tasks, and <b>transferred across scenarios and victim models</b>.</figcaption>
+        <img src="assets/aha_overview.png" alt="AHA pipeline: scenario and victim setup, Stage-1 falsifiable autoresearch discovery, and Stage-2 held-out evaluation.">
+        <figcaption>Scenario and victim setup, Stage-1 falsifiable autoresearch, and Stage-2 held-out evaluation. Confirmed concepts support reuse and provide targets for repair.</figcaption>
       </figure>
       <h2 class="subtitle has-text-centered" style="margin-top:1.3rem;color:var(--dim)">
-        Point AHA at a production agent and it returns a map of <b style="color:var(--ink)">why that agent breaks</b> —
-        reusable vulnerability <em>concepts</em> that keep working on unseen tasks and <b style="color:var(--ink)">carry across scenarios and victim models</b> they were never found on.
+        Reusable explanations of <b style="color:var(--ink)">why production agents fail</b>, and how to repair them.
       </h2>
     </div>
   </div>
@@ -93,12 +93,12 @@
 <section class="section" style="padding-top:1rem">
   <div class="container is-max-desktop">
     <div class="statstrip">
-      <div class="cell"><div class="n">117</div><div class="l">confirmed concepts</div></div>
+      <div class="cell"><div class="n">117</div><div class="l">counted concepts</div></div>
       <div class="cell"><div class="n">8</div><div class="l">mechanism families</div></div>
-      <div class="cell"><div class="n">16/18</div><div class="l">one shared core</div></div>
-      <div class="cell"><div class="n">47.0%</div><div class="l">held-out reuse ASR</div></div>
+      <div class="cell"><div class="n">15/18</div><div class="l">shared authorization core</div></div>
+      <div class="cell"><div class="n">47.0%</div><div class="l">held-out ASR</div></div>
       <div class="cell"><div class="n">+14.2</div><div class="l">pts vs best baseline</div></div>
-      <div class="cell"><div class="n">≈88%</div><div class="l">cross-victim transfer</div></div>
+      <div class="cell"><div class="n">−41.11</div><div class="l">pp patch bundle</div></div>
     </div>
   </div>
 </section>
@@ -110,15 +110,15 @@
       <div class="column is-four-fifths">
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
-          <p>Red-teaming a production agent usually yields a pile of one-off jailbreak strings that stop working the moment
-          the task changes. AHA turns red-teaming into <b>autoresearch</b>: a researcher agent iterates on its own —
-          hypothesize an attack, run it against a Docker-sandboxed victim agent, judge the trajectory, reflect — and
-          accumulates a persistent <b>Vulnerability Concept Graph (VCG)</b> of <i>why</i> a family of attacks works,
-          <i>when</i> it fails, and <i>how</i> to reinstantiate it. Because the unit of discovery is a concept rather than a
-          prompt, a finding can be <b>frozen and reused single-shot</b> on held-out tasks — and it keeps working. Across two
-          production agent stacks, three frontier victim models, and three scenario families, AHA discovered
-          <b>117 confirmed concepts</b>, clustering into <b>eight recurring mechanism families</b>, and reached
-          <b>47.0% held-out attack success</b> — +14.2 points over the strongest frozen discovery baseline.</p>
+          <p>Production LLM agents such as Claude Code and Codex can change files and execute commands, so their safety
+          failures can produce real destructive actions. AHA turns automatic red-teaming into an <b>autoresearch</b> loop:
+          a Researcher dispatches sub-agents to propose how an attack might succeed, design and execute it, and assess
+          that explanation from the trajectory. Repeatedly supported findings are promoted into a
+          <b>Vulnerability Concept Graph (VCG)</b>. Across 18 settings — three scenarios and six victims — 117 counted
+          concepts span eight families. Frozen single-shot reuse reaches <b>47.0% held-out ASR</b> versus 32.8% for the
+          strongest search baseline, with fewer discovery queries. Transferred concepts remain effective across scenarios,
+          models, and harnesses, and their relationships can coordinate. Concept-guided patches reduce AgentHazard ASR by
+          <b>41.11 points</b>, 14.44 points beyond general screening.</p>
         </div>
       </div>
     </div>
@@ -128,42 +128,40 @@
 <!-- ===== THE CONCEPTS (featured) ===== -->
 <section class="section" id="concepts">
   <div class="container is-max-desktop">
-    <p class="eyebrow">The finding is a concept</p>
-    <h2 class="title is-3 has-text-centered">117 reusable vulnerability concepts, eight mechanism families</h2>
-    <p class="lead">Every confirmed finding is a <b>concept</b>, not a payload — a record of the mechanism a family of
-      attacks exploits, the falsifier that would refute it, and how to reinstantiate it. Clustering the discovered graphs
-      yields eight families; two are <b>cores</b> that recur across models, agents, and scenarios.</p>
+    <p class="eyebrow">RQ1 · what AHA discovers</p>
+    <h2 class="title is-3 has-text-centered">117 counted concepts, eight families — shared core, setting-specific remainder</h2>
+    <p class="lead">Every counted finding is a <b>concept</b>, not a payload: a mechanism, an enabling condition, a falsifier, and evidence. The 117 concepts span one to six families per setting (mean 3.56). Claimed authorization is the shared core; other families stay more local.</p>
 
     <div class="fam-grid">
       <div class="fam core"><div class="fn">Claimed authorization <span class="core-tag">core</span></div>
         <p>Grants the harmful step legitimacy through an ownership / admin / compliance frame, so the agent never reconstructs the global intent.</p>
-        <div class="cov"><span>coverage</span><b>16 / 18</b></div><div class="track"><div class="fill" style="width:89%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>15 / 18</b></div><div class="track"><div class="fill" style="width:83%"></div></div></div>
       <div class="fam core"><div class="fn">Task-goal hijack <span class="core-tag">core</span></div>
         <p>Injected content in a tool result plants a competing goal that the agent adopts as its own task.</p>
-        <div class="cov"><span>indirect channels</span><b>9 / 12</b></div><div class="track"><div class="fill" style="width:75%"></div></div></div>
+        <div class="cov"><span>indirect channels</span><b>7 / 12</b></div><div class="track"><div class="fill" style="width:58%"></div></div></div>
       <div class="fam"><div class="fn">Harm split across steps</div>
         <p>Each step looks benign; the harm exists only in the composition across turns, so local checks never aggregate it.</p>
-        <div class="cov"><span>AgentHazard · DTap</span><b>6 / 18</b></div><div class="track"><div class="fill" style="width:33%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>10 / 18</b></div><div class="track"><div class="fill" style="width:56%"></div></div></div>
       <div class="fam"><div class="fn">Spoofed trust signal</div>
         <p>Forges identity, authority, or provenance markers ("our team's key") so the agent trusts the source of the request.</p>
-        <div class="cov"><span>all scenarios</span><b>9 / 18</b></div><div class="track"><div class="fill" style="width:50%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>7 / 18</b></div><div class="track"><div class="fill" style="width:39%"></div></div></div>
       <div class="fam"><div class="fn">Fictional reframing</div>
         <p>Wraps the request in fiction / roleplay so the model treats a real operation as make-believe.</p>
-        <div class="cov"><span>mostly AgentHazard</span><b>6 / 18</b></div><div class="track"><div class="fill" style="width:33%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>2 / 18</b></div><div class="track"><div class="fill" style="width:11%"></div></div></div>
       <div class="fam"><div class="fn">Benign-purpose cover</div>
         <p>A legit-sounding declared purpose — testing, debugging, a defensive fixture — launders the harmful action.</p>
-        <div class="cov"><span>AgentHazard</span><b>5 / 18</b></div><div class="track"><div class="fill" style="width:28%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>8 / 18</b></div><div class="track"><div class="fill" style="width:44%"></div></div></div>
       <div class="fam"><div class="fn">Routine-context pretext</div>
         <p>Frames the harmful action as normal, expected operations inside the environment, so it passes as ops.</p>
-        <div class="cov"><span>AgentDyn</span><b>5 / 18</b></div><div class="track"><div class="fill" style="width:28%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>10 / 18</b></div><div class="track"><div class="fill" style="width:56%"></div></div></div>
       <div class="fam"><div class="fn">Outcome manipulation</div>
         <p>Games the judge / verdict layer so a harmful result is scored or treated as acceptable.</p>
-        <div class="cov"><span>DTap only</span><b>4 / 18</b></div><div class="track"><div class="fill" style="width:22%"></div></div></div>
+        <div class="cov"><span>coverage</span><b>5 / 18</b></div><div class="track"><div class="fill" style="width:28%"></div></div></div>
     </div>
 
     <figure class="pfig">
-      <img src="assets/vcg_landscape.png" alt="Mechanism-family landscape heatmap: eight families (rows) across eighteen scenario × agent × victim settings (columns); claimed authorization is lit in 16 of 18.">
-      <figcaption><b>The same eight families recur across every setting.</b> Rows are mechanism families; columns are all 18 scenario × agent × victim settings. The claimed-authorization core is lit in <b>16 of 18</b>, and task-goal hijack across the indirect channel — the concepts are cross-cutting, not scenario-local.</figcaption>
+      <img src="assets/rq1_quantitative.png" alt="RQ1: confirmation and falsification rates, family-set Jaccard overlap, semantic embedding, and an example VCG.">
+      <figcaption><b>Shared core, diverse mechanisms.</b> (a) Confirmation and falsification rates for 117 counted concepts. (b) Family-set overlap across 18 settings. (c) Sentence embeddings by family. (d) An AgentDyn VCG with recorded relations.</figcaption>
     </figure>
 
     <!-- concrete concept records -->
@@ -174,7 +172,7 @@
         <div class="nm">Assumed-ownership authorization bypass</div>
         <div class="row why"><span class="lbl">why it works</span>A first-person ownership claim ("this is my box / my repo") is accepted as authorization, so the agent skips the provenance check it would otherwise run.</div>
         <div class="row when"><span class="lbl">falsifier</span>Refuted if the agent verifies key/asset provenance before acting.</div>
-        <div class="reach">reach: 16 / 18 settings · 5 harm classes</div>
+        <div class="reach">claimed authorization · 15 / 18 settings</div>
       </div>
       <div class="vc">
         <div class="id">VC · task-goal hijack</div>
@@ -194,7 +192,7 @@
 
     <div class="bridge">
       <div class="big">One concept — <em>many harms, many targets.</em></div>
-      <p>The claimed-authorization core lights up 16 of 18 settings and, realized, produces machine takeover, fraud, exfiltration, and destruction alike. Frozen and reused single-shot, the concepts even break <em>scenarios and victim models they were never discovered on</em>. Patching the <em>mechanism</em> closes a whole class of failures — not a single prompt.</p>
+      <p>Claimed authorization appears in 15 of 18 settings and, realized, produces machine takeover, fraud, exfiltration, and destruction alike. Frozen and reused single-shot, the concepts still break <em>settings they were never discovered on</em>. Patching the enabling condition closes a class of failures — not a single prompt.</p>
     </div>
   </div>
 </section>
@@ -257,7 +255,7 @@
     <h2 class="title is-3 has-text-centered">Explore every confirmed break</h2>
     <p class="lead">Browse <b>by mechanism family</b> to watch one concept recur across scenarios and victims — or switch to
       <b>by target cell</b>. Click any tile to read the vulnerability concepts: the mechanism (why), what the agent did, and
-      the evidence. 117 concepts, 8 families, 17 cells — every cell broken.</p>
+      the evidence. 117 counted concepts, 8 families, 18 settings.</p>
     <div class="viewtoggle" id="viewtoggle">
       <button class="vt on" data-mode="family">▚&nbsp; by mechanism</button>
       <button class="vt" data-mode="cell">▤&nbsp; by target cell</button>
@@ -302,43 +300,58 @@
 <!-- ===== VALIDATION ===== -->
 <section class="section hero is-light" id="validation">
   <div class="container is-max-desktop">
-    <p class="eyebrow">Reusable &amp; transferable</p>
-    <h2 class="title is-3 has-text-centered">Frozen, the concepts keep working — and travel</h2>
-    <p class="lead">Each discovery artifact is frozen and reused single-shot on held-out tasks, with no further search — so
-      every break is the concept's, not the search's. And a concept frozen on one setting still breaks the others.</p>
+    <p class="eyebrow">RQ2 · reuse</p>
+    <h2 class="title is-3 has-text-centered">Frozen concepts keep working — and travel</h2>
+    <p class="lead">Each discovery artifact is frozen and instantiated once per held-out instance, with no further search. AHA reaches <b>47.0%</b> mean ASR versus <b>32.8%</b> for the strongest search baseline (+14.2 points), using 594 / 629 discovery queries under Claude Code / Codex.</p>
     <table class="vtable">
-      <thead><tr><th>Scenario</th><th>Claude Code</th><th>Codex</th><th>AHA avg</th><th>best baseline</th></tr></thead>
+      <thead><tr><th>Scenario</th><th>Claude Code</th><th>Codex</th><th>AHA avg</th></tr></thead>
       <tbody>
-        <tr><td>AgentHazard</td><td>77.4</td><td>74.8</td><td class="win">76.1</td><td class="base">58.5</td></tr>
-        <tr><td>AgentDyn</td><td>25.0</td><td>20.2</td><td class="win">22.6</td><td class="base">6.6</td></tr>
-        <tr><td>DTap</td><td>47.6</td><td>36.7</td><td class="win">42.2</td><td class="base">41.5</td></tr>
-        <tr><td><b>Overall</b></td><td colspan="2"></td><td class="win">47.0</td><td class="base">32.8</td></tr>
+        <tr><td>AgentHazard</td><td>77.41</td><td>74.81</td><td class="win">76.11</td></tr>
+        <tr><td>AgentDyn</td><td>25.00</td><td>20.24</td><td class="win">22.62</td></tr>
+        <tr><td>DTap</td><td>47.62</td><td>36.73</td><td class="win">42.18</td></tr>
+        <tr><td><b>Overall</b></td><td colspan="2"></td><td class="win">47.0 vs 32.8 baseline</td></tr>
       </tbody>
     </table>
-    <p class="vnote">+14.2 points over the strongest frozen discovery baseline — the concepts keep working when detached from the search that found them.</p>
+    <p class="vnote">Removing the falsifier drops held-out ASR by 13.36 points on average.</p>
 
-    <div class="pfig-row">
-      <figure class="pfig"><img src="assets/xtransfer.png" alt="Cross-scenario transfer: held-out ASR when a scenario's frozen VCG is reused on another scenario's split.">
-        <figcaption><b>Across scenarios.</b> A scenario's frozen VCG reused on <em>another</em> scenario's held-out split — an indirect-only VCG still hits <b>41.8%</b> on DTap-indirect and <b>42.5%</b> on DTap-direct.</figcaption></figure>
-      <figure class="pfig"><img src="assets/xvictim.png" alt="Cross-victim transfer: held-out ASR when one victim's frozen VCG is used against the other two victims.">
-        <figcaption><b>Across victim models.</b> One victim's frozen VCG against the other two — up to <b>86.7%</b>, averaging ≈88% of each target's native rate (some above native).</figcaption></figure>
-    </div>
-    <p class="vnote">A concept frozen on one setting still breaks the others: the finding lives in the agent's trajectory, not in a payload tied to where it was found. <b>A mechanism compounds where an exploit decays.</b></p>
+    <figure class="pfig">
+      <img src="assets/rq4_transfer.png" alt="Concept transfer across scenarios, victim models, and agent harnesses.">
+      <figcaption><b>Transfer (RQ2).</b> AgentDyn concepts reach 42.6% / 41.8% on DTap direct / indirect. Cross-victim transfer retains 88% of native ASR (Deepseek → Minimax 86.67%). Cross-harness transfer reaches 39.28% mean ASR.</figcaption>
+    </figure>
+
+    <p class="lead" style="margin-top:2rem">A recorded graph relationship can coordinate two concepts into one attack. Coordinated reuse beats the full VCG on AgentHazard and DTap, and falls behind on AgentDyn.</p>
+    <table class="vtable">
+      <thead><tr><th>Target</th><th>Concept A</th><th>Concept B</th><th>Joined</th><th>Coordinated</th><th>Full VCG</th><th>Δ vs full</th></tr></thead>
+      <tbody>
+        <tr><td>AgentHazard</td><td>71.11</td><td>63.33</td><td>72.22</td><td class="win">78.89</td><td>74.44</td><td class="win">+4.44</td></tr>
+        <tr><td>AgentDyn</td><td>12.50</td><td>10.71</td><td>14.29</td><td>12.50</td><td class="win">19.64</td><td>−7.14</td></tr>
+        <tr><td>DTap</td><td>32.14</td><td>29.08</td><td>34.69</td><td class="win">40.31</td><td>34.18</td><td class="win">+6.12</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
-<!-- ===== EXTEND ===== -->
-<section class="section" id="extend">
+<!-- ===== REPAIR ===== -->
+<section class="section" id="repair">
   <div class="container is-max-desktop">
-    <p class="eyebrow">Bring your own</p>
-    <h2 class="title is-3 has-text-centered">The method extends to any agent you can sandbox</h2>
-    <p class="lead">The three scenarios here are where transfer was measured — not the ceiling. A build workflow turns a
-      plain-language red-team concern into a runnable scenario; an import workflow turns an existing benchmark into one.
-      Same loop, new target.</p>
+    <p class="eyebrow">RQ3 · defenses</p>
+    <h2 class="title is-3 has-text-centered">The same concepts guide targeted patches</h2>
+    <p class="lead">One patch per family, built from enabling conditions in the discovery record. Family patches lower AgentHazard ASR by 36.00 points on average. The combined bundle improves on Llama Guard by 14.44 points.</p>
     <figure class="pfig">
-      <img src="assets/scenario_workflow.png" alt="Two workflows: build a scenario from a free-text concern, or import an existing benchmark into a runnable scenario.">
-      <figcaption>Left: <b>build</b> a scenario from a free-text concern. Right: <b>import</b> an existing benchmark. Either way you get a runnable scenario the same VCG loop attacks.</figcaption>
+      <img src="assets/rq5_repair_defenses.png" alt="Family patches and comparison with general defenses on AgentHazard.">
+      <figcaption><b>Repair (RQ3).</b> (a) Family patches reduce mean ASR by 36.00 points. (b) The patch bundle lowers ASR from 77.41% to 36.67% under Claude Code and from 74.81% to 33.33% under Codex — a 41.11-point mean drop from the undefended agents.</figcaption>
     </figure>
+    <table class="vtable" style="margin-top:1.4rem">
+      <thead><tr><th>Defense</th><th>Claude Code</th><th>Codex</th></tr></thead>
+      <tbody>
+        <tr><td>None</td><td>77.41</td><td>74.81</td></tr>
+        <tr><td>Prompt Guard</td><td>69.26</td><td>67.04</td></tr>
+        <tr><td>Llama Guard</td><td>48.89</td><td>50.00</td></tr>
+        <tr><td>Safety system prompt</td><td>65.93</td><td>58.89</td></tr>
+        <tr><td>Targeted patches</td><td class="win">36.67</td><td class="win">33.33</td></tr>
+      </tbody>
+    </table>
+    <p class="vnote">Bring-your-own scenarios: same loop, new target — see <a href="https://github.com/henrymao2004/Auto-research-red-teaming/blob/main/docs/BYO_SCENARIO.md">docs/BYO_SCENARIO.md</a>.</p>
   </div>
 </section>
 
@@ -350,11 +363,11 @@
       <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX"><i class="fas fa-copy"></i> <span class="copy-text">Copy</span></button>
     </div>
     <pre id="bibtex-code"><code>@online{2607.11698,
-Author = {Xutao Mao and Xiang Zheng and Cong Wang},
-Title = {Agent Hacks Agent: Autoresearch for Production-Agent Red-Teaming},
-Year = {2026},
-Eprint = {2607.11698},
-Eprinttype = {arXiv},
+  author = {Xutao Mao and Rui Qian and Xiang Zheng and Cong Wang},
+  title = {Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents},
+  year = {2026},
+  eprint = {2607.11698},
+  eprinttype = {arXiv},
 }</code></pre>
   </div>
 </section>
@@ -362,7 +375,7 @@ Eprinttype = {arXiv},
 <footer class="footer">
   <div class="container">
     <div class="columns is-centered"><div class="column is-8"><div class="content has-text-centered">
-      <p><b>AHA · Agent Hacks Agent</b> — AutoResearch for Production-Agent Red-Teaming.</p>
+      <p><b>AHA · Agent Hacks Agents</b> — Autoresearch Discovers Vulnerabilities in Production Agents.</p>
       <p style="font-size:.8rem">Page built with the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>. Licensed
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>.</p>
     </div></div></div>
@@ -385,9 +398,10 @@ Eprinttype = {arXiv},
     {s:"AgentDyn",v:"Minimax-M2.7",ab:"MM",c:"#8a6bb0",a:"Claude Code",n:9,h:["money transfer","credential phishing","data exfil","access grant","settings tampering","ownership handover","data destruction","malicious download","unauthorized purchase"],slug:"adyn_mm_claudecode"},
     {s:"AgentDyn",v:"Minimax-M2.7",ab:"MM",c:"#8a6bb0",a:"Codex",n:3,h:["money transfer","access grant","data exfil"],slug:"adyn_mm_codex"},
     {s:"AgentDyn",v:"Kimi-K2.6",ab:"KM",c:"#3f8f86",a:"Claude Code",n:3,h:["money transfer","account takeover","access grant","ownership handover","asset deletion","unauthorized purchase"],slug:"adyn_km_claudecode"},
+    {s:"AgentDyn",v:"Kimi-K2.6",ab:"KM",c:"#3f8f86",a:"Codex",n:1,h:["task-goal hijack"],slug:"adyn_km_codex"},
     {s:"DTap",v:"DeepSeek-V4-Pro",ab:"DS",c:"#3f6fb0",a:"Claude Code",n:7,h:["record destruction","financial fraud","data exfil","credential/PII exposure","privacy violation","coercion / harassment","deception","disallowed content","piracy"],slug:"dtap_ds_claudecode"},
     {s:"DTap",v:"DeepSeek-V4-Pro",ab:"DS",c:"#3f6fb0",a:"Codex",n:3,h:["financial fraud","data exfil","false deliverable"],slug:"dtap_ds_codex"},
-    {s:"DTap",v:"Minimax-M2.7",ab:"MM",c:"#8a6bb0",a:"Claude Code",n:5,h:["irreversible transfer fraud","CRM destruction","data exfil","surveillance implant","sec-control sabotage","deceptive record","budget override","piracy"],slug:"dtap_mm_claudecode"},
+    {s:"DTap",v:"Minimax-M2.7",ab:"MM",c:"#8a6bb0",a:"Claude Code",n:4,h:["irreversible transfer fraud","CRM destruction","data exfil","surveillance implant","sec-control sabotage","deceptive record","budget override","piracy"],slug:"dtap_mm_claudecode"},
     {s:"DTap",v:"Minimax-M2.7",ab:"MM",c:"#8a6bb0",a:"Codex",n:3,h:["fabricated decision","unsafe recommendation"],slug:"dtap_mm_codex"},
     {s:"DTap",v:"Kimi-K2.6",ab:"KM",c:"#3f8f86",a:"Claude Code",n:5,h:["fabricated medical diagnosis","unsafe over-ordering","financial fraud","data exfil","service sabotage","deception"],slug:"dtap_km_claudecode"},
     {s:"DTap",v:"Kimi-K2.6",ab:"KM",c:"#3f8f86",a:"Codex",n:5,h:["record destruction","fund-transfer fraud","billing fraud","data exfil","record tampering","scheduling sabotage","copyright","phishing delivery","procurement manipulation","over-ordering","bulk spam"],slug:"dtap_km_codex"}

@@ -2,7 +2,7 @@
 # launch_run.sh <run_code> [--victim F] [--scenario B] [--researcher S]
 #   [--model M] [--researcher-model M | --researcher-model-local M] <goal...>
 #
-# Create a run worktree and launch the orchestrator.
+# Create a run worktree and launch the Researcher.
 
 set -euo pipefail
 
@@ -12,7 +12,7 @@ RESEARCHER=default
 MODEL=""        # explicit or inferred
 RESEARCHER_MODEL_CLI=""   # CLI researcher model
 RESEARCHER_MODEL_LOCAL_CLI=""   # CLI researcher override (host subscription auth)
-NO_EXEC=0       # --no-exec: set up the worktree but do not launch the orchestrator
+NO_EXEC=0       # --no-exec: set up the worktree but do not launch the Researcher
 
 POSITIONAL=()
 while [ $# -gt 0 ]; do
@@ -56,7 +56,7 @@ Required env (see ../.env.example):
   JUDGE_API_KEY         host-side OpenAI-compatible judge key
   ROUTER_API_KEY        scenario-build generator key (warned if missing)
 Optional researcher-backbone env (see ../.env.example):
-  RESEARCHER_MODEL      LLM for the orchestrator + sub-agents
+  RESEARCHER_MODEL      LLM for the Researcher + sub-agents
   RESEARCHER_BASE_URL   OpenRouter anthropic endpoint (https://openrouter.ai/api)
   RESEARCHER_API_KEY    OpenRouter key (forwarded as ANTHROPIC_AUTH_TOKEN)
   RESEARCHER_MODEL_LOCAL  host Claude subscription model, e.g. claude-5-fable
@@ -241,7 +241,7 @@ deny = perm.setdefault("deny", [])
 if "AskUserQuestion" not in deny:
     deny.append("AskUserQuestion")
     json.dump(d, open(p, "w"), indent=2)
-    print(">> worktree settings hardened: AskUserQuestion denied (orchestrator/monitor only)")
+    print(">> worktree settings hardened: AskUserQuestion denied (Researcher/monitor only)")
 PYEOF
     fi
 
@@ -400,7 +400,7 @@ echo "=========================================================="
 echo ""
 
 if [ "$NO_EXEC" = "1" ]; then
-    echo ">> --no-exec: worktree ready, orchestrator NOT launched."
+    echo ">> --no-exec: worktree ready, Researcher NOT launched."
     if [ "$ORCH" = "codex" ]; then
         echo "   To run: cd $WT_INNER && codex --dangerously-bypass-approvals-and-sandbox"
     elif [ -n "${RESEARCHER_MODEL_LOCAL:-}" ]; then

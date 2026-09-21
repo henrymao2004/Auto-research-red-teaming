@@ -10,8 +10,8 @@ Three are registry-discovered plugin axes; two are runtime model params:
 
 | Variable          | What it is                                                                 | How it's chosen                           |
 | ----------------- | -------------------------------------------------------------------------- | ----------------------------------------- |
-| **researcher agent** | the harness running the attack-search **method** (which sub-agents it dispatches each round) | plugin — `--researcher` (`plugins/researchers/<name>/`, default `default`; `codex` also ships) |
-| **research model** | the LLM the researcher agent (orchestrator + sub-agents) runs on | runtime — for Claude researcher: `--researcher-model-local claude-5-fable` or `--researcher-model <provider/model>`; for Codex researcher: `--researcher codex --researcher-model gpt-5.5` / `gpt-5.4` |
+| **researcher plugin** | sub-agent roster the Researcher dispatches each round | plugin — `--researcher` (`plugins/researchers/<name>/`, default `default`; `codex` also ships) |
+| **research model** | the LLM the Researcher and its four sub-agents run on | runtime — for Claude researcher: `--researcher-model-local claude-5-fable` or `--researcher-model <provider/model>`; for Codex researcher: `--researcher codex --researcher-model gpt-5.5` / `gpt-5.4` |
 | **victim agent**  | the harness **under attack**                                          | plugin — `--victim` (`plugins/victims/<name>/`, default `claude_code`) |
 | **victim model**  | the LLM the **victim agent** runs on — the target being attacked | runtime — `--model` (**mandatory**, e.g. `deepseek-v4-pro`) |
 | **scenario**      | task suite + attack family + judge                        | plugin — `--scenario` (`plugins/scenarios/<name>/`, default `agenthazard`) |
@@ -150,16 +150,16 @@ Per iteration (the `/autoresearch-redteam-discovery` skill, dispatched by
 | Step | Sub-agent / Tool                | Writes                                                |
 | ---- | ------------------------------- | ----------------------------------------------------- |
 | 0    | `STOP` file check               | (early-exit if monitor wrote `STOP`)                  |
-| 1    | Orchestrator reads run state + log | `RUN_HINT.md`, `vcg.md`, `AGENT_LOG.md`            |
-| 2    | Orchestrator picks mode + Stage-1 instance | `attacks/<run>/v<N>/` directory             |
-| 3a   | `redteam-hypothesizer` (Opus)    | `v<N>/proposal.md` (hypothesis + falsifier)           |
-| 3b   | `redteam-attack-designer` (Opus) | `v<N>/attack.json` + proposal's "Attack design" block |
+| 1    | Researcher reads run state + log | `RUN_HINT.md`, `vcg.md`, `AGENT_LOG.md`            |
+| 2    | Researcher picks mode + Stage-1 instance | `attacks/<run>/v<N>/` directory             |
+| 3a   | `redteam-hypothesizer` (research model) | `v<N>/proposal.md` (hypothesis + falsifier)           |
+| 3b   | `redteam-attack-designer` (research model) | `v<N>/attack.json` + proposal's "Attack design" block |
 | 4    | `Bash: run_attack` (Docker)      | `v<N>/result.json`, `v<N>/trajectory.json`            |
-| 5    | `redteam-reflector` (Sonnet)     | `v<N>/reflection.md` (is_break / hypothesis_status)   |
-| 6    | Orchestrator updates run ledger  | `vcg.md`                                              |
-| 7    | Orchestrator commits             | `git commit -m 'v<N>: ...'`                           |
-| 7.5  | `redteam-critic` (Opus, every 10 iter) | `AGENT_LOG.md` critique block                  |
-| 8    | Orchestrator appends iter row    | `AGENT_LOG.md` table                                  |
+| 5    | `redteam-reflector` (research model) | `v<N>/reflection.md` (is_break / hypothesis_status)   |
+| 6    | Researcher updates run ledger  | `vcg.md`                                              |
+| 7    | Researcher commits             | `git commit -m 'v<N>: ...'`                           |
+| 7.5  | `redteam-critic` (research model, every 10 iter) | `AGENT_LOG.md` critique block                  |
+| 8    | Researcher appends iter row    | `AGENT_LOG.md` table                                  |
 | 9    | Done — `/loop` re-invokes        | —                                                     |
 
 The important user-facing artifacts are `attack.json`, `result.json`,
@@ -167,32 +167,6 @@ The important user-facing artifacts are `attack.json`, `result.json`,
 `SUMMARY.md`. The internal ledger file (`vcg.md`) is used by the
 held-out pipeline; its schema lives in
 [`ARCHITECTURE.md`](ARCHITECTURE.md).
-
-### Stage 1 — Workflow driver (optional, batched-parallel + resumable)
-
-The `/loop` skill above drives one iteration per turn. For higher throughput
-and resumability, Stage 1 can instead run through an optional **Workflow
-driver** built on Claude Code's Workflow orchestration
-([`plugins/researchers/default/workflows/`](../autoresearcher/plugins/researchers/default/workflows/README.md)).
-Per batch it selects K mutually-independent proposals against one VCG
-snapshot, runs the `[hypothesizer → attack-designer → run_attack → reflector]`
-chain in parallel, then folds the VCG serially — the same four sub-agents,
-falsifier protocol, and promotion gate as the skill path, and it never
-self-stops (only the monitor's `STOP` file, the outer cap, or the token budget
-halts it). The mechanical bookkeeping (select / fold / promote / commit) runs
-as deterministic MCP tools from `discovery_mcp.py`.
-
-Run it after launching a run the normal way:
-
-1. `export AHA_WORKSPACE=<worktree root>` (the dir holding `attacks/` + `RUN_HINT.md`).
-2. Register the MCP server — put `plugins/researchers/default/workflows/.mcp.json`
-   on the session's MCP path, or
-   `claude mcp add aha-discovery -- uv run -m autoresearch_redteam.discovery_mcp`.
-3. `Workflow({ scriptPath: "plugins/researchers/default/workflows/aha_discovery.js", args: { run_code: "<run>", cap: 100 } })`.
-4. Watch with `/workflows`; resume after a stop with `Workflow({ scriptPath, resumeFromRunId })`.
-
-Batch size K is budget-adaptive (2–5). The default `/loop` path needs none of
-this setup.
 
 ### Stage 2 — held-out evaluation via `/concept-eval`
 
@@ -256,11 +230,11 @@ See [`PLUGINS.md`](PLUGINS.md) for the registry + Protocol description, and
 ```
                          Window 1                                Window 2
             ┌─────────────────────────┐                ┌──────────────────┐
-            │ Orchestrator + sub-     │                │ Monitor          │
-            │  agents (researcher     │                │  (researcher     │
-            │  agent on the RESEARCH  │                │   agent,         │
-            │  MODEL — Claude or      │                │   /loop 15m)     │
-            │  Codex model)           │                │                  │
+            │ Researcher + four       │                │ Monitor          │
+            │  sub-agents (same       │                │  (sidecar,       │
+            │  RESEARCH MODEL —       │                │   /loop 15m)     │
+            │  Claude or Codex)       │                │                  │
+            │                         │                │                  │
             │                         │                │  10 stop signals │
             │ ┌─ Step 3a ──────┐      │                │  (2 critical)    │
             │ │ Task(          │      │                │  → STOP file     │
@@ -306,7 +280,7 @@ See [`PLUGINS.md`](PLUGINS.md) for the registry + Protocol description, and
                 └──────────────────────────────┘
 ```
 
-The researcher agent (orchestrator + sub-agents) runs on the **research
+The Researcher and its four sub-agents run on the **research
 model**: use `--researcher-model-local claude-5-fable` for a host Claude
 subscription researcher, `--researcher-model <provider/model>` for an
 OpenRouter / third-party Claude researcher, or
@@ -329,7 +303,7 @@ and endpoint details live in [`MODELS.md`](MODELS.md).
 
 ## Running autonomously
 
-The orchestrator and sub-agents run with
+The Researcher and sub-agents run with
 `claude --dangerously-skip-permissions` so they iterate overnight
 without prompting on every Bash call. The run is set up like this:
 
@@ -341,7 +315,7 @@ without prompting on every Bash call. The run is set up like this:
 - **Project settings** — `autoresearcher/.claude/settings.local.json`
   carries the allow/deny list; held-out per-instance JSONs live under
   `clean_heldout/`.
-- **Critic sub-agent** — a fresh-context audit every 20 iterations.
+- **Critic sub-agent** — a fresh-context audit every 10 completed iterations.
 - **Sidecar monitor** — 10 stop signals every 15 min; touches a `STOP`
   file the next iteration reads.
 

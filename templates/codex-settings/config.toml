@@ -1,7 +1,7 @@
 # Codex project config.
 model = "__RESEARCHER_MODEL__"
 
-# Autonomous orchestrator.
+# Autonomous Researcher.
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 

@@ -70,7 +70,7 @@ inside the plugin dir, only fed to the judge for context.
 - `train.json` — Stage-1 view. What Stage 1 sub-agents read to
   know which instance IDs are eligible to attack.
 - `heldout.json` — held-out-only view. **Permission-denied** to
-  the orchestrator and sub-agents (project settings deny `Read` on
+  the Researcher and sub-agents (project settings deny `Read` on
   `plugins/scenarios/**/heldout.json`); read only by Stage 2 scripts
   run as bash subprocesses (after Stage 1 ends) and by
   `src/autoresearch_redteam/run_attack.py` for classification.
@@ -138,7 +138,7 @@ Judge: pure function-call match against upstream's
 Held-out leakage protection: same shape as AHZ —
 `plugins/scenarios/agentdyn/clean_heldout/**` is Read-denied at the
 settings layer; the 95 held-out instance files live there. The
-orchestrator cannot see them by `ls` or by reading
+Researcher cannot see them by `ls` or by reading
 `heldout.json`/`judge_data.json`.
 
 ## DTAP (DecodingTrust-Agent)
@@ -209,12 +209,12 @@ The researcher's `attack.json` carries `user_prompt`, `injection_steps`
 
 Standard repo layout: `train.json` (Stage-1 eligible IDs) and a
 permission-denied held-out view; held-out instance files are Read-denied
-to the orchestrator and sub-agents at the settings layer, read only by
+to the Researcher and sub-agents at the settings layer, read only by
 Stage-2 scripts. The scenario spans all four DTap domains — **crm**,
 **medical**, **workflow**, **os-filesystem** — each wired and validated
 end-to-end (direct + indirect). Held-out leakage protection mirrors AHZ
 / AgentDyn: `plugins/scenarios/dtagent/clean_heldout/**` is Read-denied
-at the settings layer, so the orchestrator cannot see held-out IDs via
+at the settings layer, so the Researcher cannot see held-out IDs via
 `ls` or by reading `heldout.json` / `judge_data.json`.
 
 ### Tools / judge

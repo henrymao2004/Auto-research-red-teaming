@@ -104,6 +104,7 @@
       "Read(plugins/scenarios/**/heldout.json)",
       "Read(plugins/scenarios/**/judge_data.json)",
       "Read(plugins/scenarios/**/clean_heldout/**)",
+      "Read(plugins/scenarios/**/judges/**)",
       "Bash(sudo *)",
       "Bash(sudo:*)",
       "Bash(curl * | sh)",

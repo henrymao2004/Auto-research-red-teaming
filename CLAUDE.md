@@ -8,9 +8,9 @@ level down, so this file is just a map.
 
 - **`autoresearcher/`** — the main project (the autoresearch red-team system).
   Do substantive work from here: it holds `scripts/`, `plugins/`, `src/`.
-  - **`autoresearcher/CLAUDE.md`** — the orchestrator's runtime guide. Read it
-    before driving a run (it is what the researcher agent follows each iteration).
-  - **`autoresearcher/AGENTS.md`** — the Codex-orchestrator sibling of that guide.
+  - **`autoresearcher/CLAUDE.md`** — the Researcher's runtime guide. Read it
+    before driving a run (it is what the Researcher follows each iteration).
+  - **`autoresearcher/AGENTS.md`** — the Codex-Researcher sibling of that guide.
 - **`AGENT.md`** (repo root) — the full AI-agent overview of the repo: the
   experiment model (researcher agent / victim agent / scenario as plugins;
   research + victim models as runtime params), the plugin registry, and layout.
@@ -21,19 +21,10 @@ level down, so this file is just a map.
 
 ## Running Stage-1 discovery
 
-Two interchangeable drivers, same scientific contracts:
-
-1. **Default** — the `/autoresearch-redteam-discovery` skill repeated by `/loop`
-   (model-driven, one iteration per turn).
-2. **Optional Workflow driver** — batched-parallel + resumable, at
-   `autoresearcher/plugins/researchers/default/workflows/` (script
-   `aha_discovery.js` + the host-side MCP server
-   `autoresearcher/src/autoresearch_redteam/discovery_mcp.py`). See that
-   directory's `README.md` for how to register the MCP server and launch it.
-
-Both reuse the same four sub-agents, the falsifier protocol, the promotion gate,
-and clean/ oracle isolation; neither ever self-stops (only the monitor's `STOP`
-file, the outer cap, or the budget halts a run).
+Drive `/autoresearch-redteam-discovery` with `/loop` (one iteration per
+turn). The Researcher selects the next experiment and dispatches four
+sub-agents under the falsifier protocol and promotion gate. Only the
+monitor's `STOP` file, the outer cap, or the budget halt a run.
 
 ## Working here
 

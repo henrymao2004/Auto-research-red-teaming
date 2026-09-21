@@ -8,7 +8,7 @@ rendered.
 
 ```bash
 git clone https://github.com/henrymao2004/Auto-research-red-teaming.git
-cd Auto-research-red-teaming
+cd aha
 uv venv && source .venv/bin/activate && uv pip install -e .
 
 bash autoresearcher/scripts/dry_run.sh

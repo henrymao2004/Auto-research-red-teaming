@@ -6,7 +6,7 @@
 > from `autoresearcher/`, run `./scripts/launch_run.sh <run_code> '<one-line goal>'`.
 >
 > The launcher copies the brief into the worktree and links it from
-> `RUN_HINT.md` so the orchestrator reads it on every iteration. The
+> `RUN_HINT.md` so the Researcher reads it on every iteration. The
 > brief is treated as authoritative context (longer-horizon goal,
 > constraints, prior dead-ends) that supplements the one-line goal
 > string.
@@ -75,6 +75,6 @@ multi-turn surface; this run should focus on indirect channels").
 
 ## 8. Free-form notes
 
-Anything else the orchestrator + Hypothesizer should know — prior
+Anything else the Researcher + Hypothesizer should know — prior
 findings, related papers, hypotheses to prioritise, debugging
 hypotheses about the victim's safety stack.

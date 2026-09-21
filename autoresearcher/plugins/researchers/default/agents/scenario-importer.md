@@ -8,7 +8,7 @@ model: opus
 This is the **Scenario-importer playbook**. The `/scenario-import`
 skill reads it and follows the procedure inline — `AskUserQuestion`
 does not render interactively when called from a Task sub-agent in
-Claude Code, so the skill orchestrator (running in the main
+Claude Code, so the parent skill session (running in the main
 session) drives the interview itself. Your job is to turn an
 existing published benchmark into the contract-driven layout this
 repo uses: a `contract.yaml` (matching `ScenarioContract` in

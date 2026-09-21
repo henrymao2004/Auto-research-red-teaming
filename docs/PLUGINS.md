@@ -3,7 +3,7 @@
 `Auto-research-red-teaming-in-sleep` is a **general autoresearch-in-red-teaming
 system**. The case studies the paper ships (Claude Code / Codex ×
 {AgentHazard, AgentDyn, DTAgent}) are just instances of the plugin
-system below; nothing in the core orchestrator depends on them.
+system below; nothing in the core Researcher loop depends on them.
 
 ## The variables of an experiment
 
@@ -14,8 +14,8 @@ parameters — there is **no "model plugin"**:
 
 | Variable             | What it is                                                                  | How it's chosen                                          |
 | -------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------- |
-| **researcher agent** | the agent harness running the attack-discovery method (which sub-agents it dispatches each round) | plugin — `--researcher` (`plugins/researchers/<name>/`)  |
-| **research model**   | the LLM the researcher agent (orchestrator + sub-agents) runs on            | runtime — `--researcher-model`, `--researcher-model-local` |
+| **researcher plugin** | sub-agent roster the Researcher dispatches each round | plugin — `--researcher` (`plugins/researchers/<name>/`)  |
+| **research model**   | the LLM the Researcher and its four sub-agents run on            | runtime — `--researcher-model`, `--researcher-model-local` |
 | **victim agent**     | the agent harness under attack                                              | plugin — `--victim` (`plugins/victims/<name>/`)          |
 | **victim model**     | the underlying LLM the victim agent runs on — the target being attacked     | runtime — `--model` (mandatory, e.g. `deepseek-v4-pro`)  |
 | **scenario**         | attack scenario = task suite + attack family + judge                        | plugin — `--scenario` (`plugins/scenarios/<name>/`)      |
@@ -49,22 +49,14 @@ scenario's `native_attack_family` must be in the victim agent's
 ## Researcher agent plugin
 
 The researcher agent plugin defines the research method — which sub-agents
-the orchestrator dispatches each iteration. It lives at
+the Researcher dispatches each iteration. It lives at
 `plugins/researchers/<name>/` and ships an `agents/*` sub-agent roster
 that `launch_run.sh` copies into the worktree at run time. The roster
-format follows the orchestrator the researcher runs on: the `default`
+format follows the Researcher harness (`claude` vs `codex`): the `default`
 (Claude Code) researcher ships `agents/*.md` files copied into
 `.claude/agents/`; the `codex` researcher ships `agents/*.toml` codex
 custom agents copied into `.codex/agents/`. Same 4-agent method either
-way — only the orchestration substrate differs.
-
-The `default` researcher plugin also ships an optional `workflows/`
-subdirectory: a deterministic, batched-parallel Workflow driver for
-Stage-1 discovery (`aha_discovery.js` + `.mcp.json`), paired with a
-host-side MCP server, `src/autoresearch_redteam/discovery_mcp.py`, that
-code-ifies the skill's mechanical rules as deterministic tools. It's an
-add, not a replacement — the skill + `/loop` path above remains the
-default. See `plugins/researchers/default/workflows/README.md`.
+way — only the dispatch substrate differs.
 
 ## Shipped plugins
 
@@ -89,9 +81,6 @@ plugins/researchers/
                     6 agents: hypothesizer / attack-designer / reflector / critic +
                     scenario-architect (for /scenario-build) +
                     scenario-importer (for /scenario-import)
-                    workflows/      optional deterministic Workflow driver
-                                    (aha_discovery.js + .mcp.json) for Stage-1
-                                    discovery — see workflows/README.md
   codex/            codex sibling of default (agents/*.toml → .codex/agents/):
                     same 4-agent method, codex native subagent spawn
 ```
@@ -180,12 +169,12 @@ needed when you edit those.
    and copies the researcher's roster in: `plugins/researchers/<R>/agents/*.md`
    into `.claude/agents/` for the `default` researcher, or `agents/*.toml`
    into `.codex/agents/` for the `codex` researcher.
-2. Inside the spawned orchestrator session,
+2. Inside the spawned Researcher session,
    `/loop /autoresearch-redteam-discovery <run_code> <goal>` reads
    RUN_HINT.md, calls `registry.scenario(S)` to fetch the categories,
    attack schema, sub-agent blurb, and instance loader, then dispatches
    the researcher's sub-agents per iteration. How that dispatch happens
-   depends on the researcher orchestrator: the `default` researcher
+   depends on the Researcher harness: the `default` researcher
    dispatches via the **Task tool** (sub-agents from `.claude/agents/`,
    ordering + file ownership enforced by `CLAUDE.md`); the `codex`
    researcher dispatches via codex's **native subagent spawn**

@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 import shutil
 import sys
@@ -17,7 +18,7 @@ def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", str(s).lower()).strip("-")
 
 PLUGIN_DIR = Path(__file__).resolve().parent
-DEFAULT_DTAP = Path("/Users/henry_mao/vlm/DecodingTrust-Agent")
+DEFAULT_DTAP = Path(os.environ.get("DTAP_REPO", "DecodingTrust-Agent"))
 DOMAINS = [
     "browser", "code", "crm", "customer-service", "finance", "legal", "macos",
     "medical", "os-filesystem", "research", "telecom", "travel", "windows", "workflow",
@@ -197,7 +198,11 @@ def convert(dtap: Path, domains: list[str], split_ratio: float, seed: int) -> di
 def main(argv: list[str]) -> int:
     global TARGET_TOTAL
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--dtap-repo", default=str(DEFAULT_DTAP))
+    p.add_argument(
+        "--dtap-repo",
+        default=str(DEFAULT_DTAP),
+        help="Local DecodingTrust-Agent checkout (or set DTAP_REPO)",
+    )
     p.add_argument("--domains", default=",".join(DOMAINS),
                    help="comma list (default all 14)")
     p.add_argument("--split", type=float, default=0.8, help="Stage-1 fraction")

@@ -18,7 +18,7 @@ builds from the registry-resolved scenario plugin.
 agents/
   redteam-hypothesizer.toml     # Step 3a (launch-pinned model, high effort)
   redteam-attack-designer.toml  # Step 3b (launch-pinned model, high effort)
-  redteam-reflector.toml        # Step 5  (launch-pinned model, low effort)
+  redteam-reflector.toml        # Step 5  (launch-pinned model, high effort)
   redteam-critic.toml           # Step 7.5, every 10 iter (launch-pinned model)
 ```
 
@@ -26,21 +26,21 @@ Each file is a **codex custom agent** (`name` / `description` /
 `developer_instructions` required; `model` / `model_reasoning_effort` /
 `sandbox_mode` optional). `launch_run.sh --researcher codex` copies these
 into the worktree's `.codex/agents/`, where codex loads them as the
-spawnable agent set for the orchestrator session.
+spawnable agent set for the Researcher session.
 
 ## How dispatch works (vs the `default` researcher)
 
 | `default` (Claude Code) | `codex` |
 |---|---|
-| orchestrator = Opus `/loop`; sub-agents via the **Task tool** | orchestrator = `codex exec`; sub-agents via codex's **native subagent spawn** (`.codex/agents/*.toml`) |
+| Researcher = Opus `/loop`; sub-agents via the **Task tool** | Researcher = `codex exec`; sub-agents via codex's **native subagent spawn** (`.codex/agents/*.toml`) |
 | `tools:` frontmatter allowlist | `sandbox_mode` (fs/shell) + `mcp_servers` per agent |
-| ordering + file ownership structurally enforced by Task dispatch | ordering + file ownership enforced by **AGENTS.md** ("mandatory ordered dispatch + else INVALID") — the orchestrator must spawn one agent, wait for its result, then spawn the next |
-| reflector = Sonnet | reflector = cheaper effort (swap `model` to a mini codex slug) |
+| ordering + file ownership structurally enforced by Task dispatch | ordering + file ownership enforced by **AGENTS.md** ("mandatory ordered dispatch + else INVALID") — the Researcher must spawn one agent, wait for its result, then spawn the next |
+| reflector = inherit (same research model) | reflector = same model and reasoning effort as the other three sub-agents |
 
 Because codex returns a **consolidated** response only after all
 *concurrently* requested agents finish, the ordered protocol (Hypothesizer
 fully before Attack-designer; Reflector only after `run_attack`) requires
-the orchestrator to issue **separate, sequential** spawn calls — never a
+the Researcher to issue **separate, sequential** spawn calls — never a
 single batched fan-out. `autoresearcher/AGENTS.md` restates this as a hard
 rule (an out-of-order or self-authored proposal/attack/reflection makes
 the iteration INVALID).
@@ -48,7 +48,7 @@ the iteration INVALID).
 ## Model
 
 Launch with `--researcher codex --researcher-model gpt-5.5` or
-`gpt-5.4`. `launch_run.sh` pins both the orchestrator
+`gpt-5.4`. `launch_run.sh` pins both the Researcher
 (`.codex/config.toml`) and copied sub-agents (`.codex/agents/*.toml`) to
 that model for the run.
 

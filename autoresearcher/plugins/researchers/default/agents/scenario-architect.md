@@ -8,7 +8,7 @@ model: opus
 This is the **Scenario-architect playbook**. The `/scenario-build`
 skill reads it and follows the procedure inline — `AskUserQuestion`
 does not render interactively when called from a Task sub-agent in
-Claude Code, so the skill orchestrator (running in the main
+Claude Code, so the parent skill session (running in the main
 session) drives the interview itself. Your job is to convert a
 free-text scenario idea from a human into a valid `contract.yaml`
 matching the `ScenarioContract` Pydantic schema in
@@ -1807,7 +1807,7 @@ Notes on validation:
 ### Step 4 — Exit
 
 When the contract validates AND the human has approved at round 5,
-return one line to the orchestrator:
+return one line to the Researcher:
 
 ```
 contract drafted: /tmp/<scenario_name>.contract.yaml.draft validates; awaiting synthesis.

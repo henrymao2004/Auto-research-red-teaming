@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use AHA, please cite it using this metadata."
+title: "Agent Hacks Agents: Autoresearch Discovers Vulnerabilities in Production Agents"
+type: software
+version: 0.1.0
+date-released: 2026-07-07
+url: "https://github.com/henrymao2004/Auto-research-red-teaming"
+repository-code: "https://github.com/henrymao2004/Auto-research-red-teaming"
+authors:
+  - family-names: Mao
+    given-names: Xutao
+  - family-names: Qian
+    given-names: Rui
+  - family-names: Zheng
+    given-names: Xiang
+  - family-names: Wang
+    given-names: Cong
+license: MIT
+keywords:
+  - LLM agents
+  - red-teaming
+  - agent safety
+  - autoresearch
+identifiers:
+  - type: url
+    value: "https://arxiv.org/abs/2607.11698"
+    description: arXiv preprint

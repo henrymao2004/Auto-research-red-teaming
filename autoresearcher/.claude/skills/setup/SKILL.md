@@ -98,7 +98,7 @@ Record `JUDGE_BASE_URL` / `JUDGE_API_KEY` / `JUDGE_MODEL`, plus
 
 After the three required slots, ask once via `AskUserQuestion`:
 
-> "Do you want the researcher agent (the orchestrator + its sub-agents
+> "Do you want the researcher agent (the Researcher + its sub-agents
 > that *design* the attacks) to run on a specific model, or just use
 > the `claude` you're already logged in with? For example, you can run
 > the whole research loop on an OpenRouter model like
@@ -111,7 +111,7 @@ After the three required slots, ask once via `AskUserQuestion`:
   `qwen/qwen3.7-max`, `anthropic/claude-opus-4`) and the **key**
   (default the base URL to OpenRouter's anthropic endpoint
   `https://openrouter.ai/api`; a custom base URL is accepted if they
-  have one). Reassure: "this points the orchestrator `claude` at that
+  have one). Reassure: "this points the Researcher `claude` at that
   model — the same OpenRouter recipe as the victim."
 
 Make clear the recipes, the same as for the victim:
@@ -125,7 +125,7 @@ Make clear the recipes, the same as for the victim:
 Record `RESEARCHER_MODEL` / `RESEARCHER_BASE_URL` / `RESEARCHER_API_KEY`
 only if they chose a specific model. Note: `launch_run.sh` keeps the
 researcher and victim backbones fully isolated — it sets the
-researcher's `ANTHROPIC_*` only on the orchestrator `claude` line, never
+researcher's `ANTHROPIC_*` only on the Researcher `claude` line, never
 exported, so the victim eval never inherits it.
 
 ## Step 4 — Validate each endpoint (a quick ping)

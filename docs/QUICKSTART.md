@@ -56,7 +56,7 @@ use host Codex auth plus `--researcher codex --researcher-model gpt-5.5` /
 
 ```bash
 git clone https://github.com/henrymao2004/Auto-research-red-teaming.git
-cd Auto-research-red-teaming
+cd aha
 uv venv && source .venv/bin/activate && uv pip install -e .
 ```
 
@@ -235,7 +235,7 @@ does this for you:
 
 - Creates worktree `worktrees/first_run01/` on branch `loop/first_run01`
 - Copies the default 4-agent roster into `.claude/agents/`
-- Writes `RUN_HINT.md` (the four variables: researcher agent, victim agent, victim model, scenario; orchestrator reads it every iteration)
+- Writes `RUN_HINT.md` (the four variables: researcher agent, victim agent, victim model, scenario; the Researcher reads it every iteration)
 - Seeds empty `vcg.md` and `AGENT_LOG.md`
 - `exec`s `claude --dangerously-skip-permissions` with cwd at the inner `autoresearcher/`
 
@@ -262,43 +262,15 @@ Per-iteration artefacts land in `attacks/first_run01/v<N>/`:
 | `trajectory.json` | `run_attack` (Docker) | full victim agent trajectory (every tool call + response) |
 | `reflection.md` | Reflector | `is_break`, `hypothesis_status`, `novel_pattern`, `surprise_signal` |
 
-Every 20 iterations the orchestrator dispatches `redteam-critic`,
+Every 10 completed iterations the Researcher dispatches `redteam-critic`,
 which appends a `## Critic check` block to `AGENT_LOG.md`.
-
-### Optional: run discovery with the Workflow driver
-
-`/loop /autoresearch-redteam-discovery` above is the default driver — one
-model-driven iteration at a time. A deterministic, batched-parallel,
-resumable alternative also ships, for higher throughput or resuming a long
-run after a crash:
-
-1. Launch the run the normal way first (this section), so `RUN_HINT.md`,
-   `attacks/<run>/`, and `clean/` exist in the worktree.
-2. Register the MCP server for the session:
-   ```bash
-   export AHA_WORKSPACE=<worktree root>   # dir containing attacks/ + RUN_HINT.md
-   # put plugins/researchers/default/workflows/.mcp.json on the session's
-   # MCP search path, or:
-   claude mcp add aha-discovery -- uv run -m autoresearch_redteam.discovery_mcp
-   ```
-3. From a Claude Code session in that worktree (needs workflow opt-in):
-   ```
-   Workflow({ scriptPath: "plugins/researchers/default/workflows/aha_discovery.js",
-              args: { run_code: "first_run01", cap: 100 } })
-   ```
-4. Watch progress with `/workflows`; resume after a stop/crash with
-   `Workflow({ scriptPath, resumeFromRunId })`.
-
-Same 4 sub-agents, falsifier, promotion gate, and never-self-stop guarantee
-as the skill path. Full reference:
-[`../autoresearcher/plugins/researchers/default/workflows/README.md`](../autoresearcher/plugins/researchers/default/workflows/README.md).
 
 ## 7. Start the monitor — window 2
 
 **Wait until `v1/` exists**, then in a second terminal:
 
 ```bash
-cd Auto-research-red-teaming/autoresearcher/worktrees/first_run01/autoresearcher
+cd aha/autoresearcher/worktrees/first_run01/autoresearcher
 claude --dangerously-skip-permissions
 ```
 
@@ -311,7 +283,7 @@ Inside the session:
 10 stop signals every 15 min — 2 critical-immediate (forbidden-path
 probing, stalled iteration) plus aggregate-red rules. When the
 monitor decides to stop it writes
-`attacks/first_run01/STOP` + `STOP_REASON.md`, and the orchestrator's
+`attacks/first_run01/STOP` + `STOP_REASON.md`, and the Researcher's
 next iteration exits at Step 0. See AGENT.md for the full signal table.
 
 ## 8. Inspect a live or finished run
@@ -343,7 +315,7 @@ uv run -m autoresearch_redteam.leaderboard --run-code first_run01 | head -20
 | Let it stop naturally | Wait. Monitor signals 9 or 10, aggregate red ≥ 3, signal 4 (reward hacking), signal 7 (outer cap = 100), or signal 11 (repeated falsification) trigger STOP. |
 | Stop gracefully now | `touch attacks/first_run01/STOP && echo "manual stop" > attacks/first_run01/STOP_REASON.md`. The next iteration's Step 0 sees the file and exits cleanly. Existing iteration finishes first. |
 | Kill immediately | `Ctrl-C` both claude sessions. The current `v<N>/` may be partially written — delete it manually before re-launching, or its missing `reflection.md` will break Stage 2. |
-| Stop the monitor only | `Ctrl-C` window 2; orchestrator keeps going until outer cap or you write `STOP`. |
+| Stop the monitor only | `Ctrl-C` window 2; the Researcher keeps going until outer cap or you write `STOP`. |
 | Resume after a graceful stop | `./scripts/launch_run.sh first_run01 ...` again — it detects the existing worktree and re-`exec`s `claude` inside it. Then re-run the `/loop ...` line. (Worktree state is preserved.) |
 
 Iteration cap is `OUTER_CAP = 100` by default
@@ -354,7 +326,7 @@ Iteration cap is `OUTER_CAP = 100` by default
 After Stage 1 stops, in the **outer host shell** (not the claude session):
 
 ```bash
-cd Auto-research-red-teaming/autoresearcher/worktrees/first_run01/autoresearcher
+cd aha/autoresearcher/worktrees/first_run01/autoresearcher
 
 # 1. Freeze COUNTED concepts (partial-only concepts are excluded).
 uv run python scripts/freeze_concepts.py first_run01
@@ -378,7 +350,7 @@ transfer, not same-experiment ASR).
 ## 11. Where everything lives
 
 ```
-Auto-research-red-teaming/
+aha/
 └── autoresearcher/
     ├── worktrees/
     │   └── first_run01/
@@ -428,7 +400,7 @@ Paste-able from cold start to first iteration:
 ```bash
 # One-time setup
 git clone https://github.com/henrymao2004/Auto-research-red-teaming.git
-cd Auto-research-red-teaming
+cd aha
 uv venv && source .venv/bin/activate && uv pip install -e .
 # configure endpoints: run /setup (recommended), or by hand:
 cp .env.example .env && $EDITOR .env
@@ -447,13 +419,13 @@ cd autoresearcher
 /loop /autoresearch-redteam-discovery first_run01 break <your-model> on AgentHazard
 
 # Monitor launch
-cd Auto-research-red-teaming/autoresearcher/worktrees/first_run01/autoresearcher
+cd aha/autoresearcher/worktrees/first_run01/autoresearcher
 claude --dangerously-skip-permissions
 # Monitor session
 /loop 15m /autoresearch-redteam-monitor first_run01
 
 # Stage 2 (after Stage 1 stops, outer shell)
-cd Auto-research-red-teaming/autoresearcher/worktrees/first_run01/autoresearcher
+cd aha/autoresearcher/worktrees/first_run01/autoresearcher
 uv run python scripts/freeze_concepts.py first_run01
 uv run python scripts/instantiate_concepts.py first_run01 --scenario agenthazard
 bash scripts/run_heldout_eval.sh first_run01 4 claude_code agenthazard <your-model>

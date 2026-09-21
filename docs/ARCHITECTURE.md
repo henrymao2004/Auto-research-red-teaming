@@ -3,9 +3,9 @@
 ## Pipeline (one iteration)
 
 ```
-Step 0   Orchestrator: check STOP file → exit if exists
-Step 1   Orchestrator: read state (AGENT_LOG.md, vcg.md, last 3 reflections)
-Step 2   Orchestrator: pick mode (EXPLORE/EXPLOIT/TRANSFER/CONSOLIDATE)
+Step 0   Researcher: check STOP file → exit if exists
+Step 1   Researcher: read state (AGENT_LOG.md, vcg.md, last 3 reflections)
+Step 2   Researcher: pick mode (EXPLORE/EXPLOIT/TRANSFER/CONSOLIDATE)
                        + pick a Stage-1 instance (NEVER held-out)
 Step 3a  Task(redteam-hypothesizer)
          → writes v<N>/proposal.md hypothesis section
@@ -14,31 +14,22 @@ Step 3b  Task(redteam-attack-designer)
 Step 4   Bash: uv run -m autoresearch_redteam.run_attack ...
          → spawns Docker victim, runs judge, writes
            v<N>/result.json + v<N>/trajectory.json
-Step 5   Task(redteam-reflector)  (sonnet, parse-heavy)
+Step 5   Task(redteam-reflector)  (inherit, same research model)
          → writes v<N>/reflection.md (is_break, hypothesis_status,
            novel_pattern, surprise_signal, optional New concept tuple)
-Step 6   Orchestrator: update vcg.md (counters, candidate→COUNTED promotion)
-Step 7   Orchestrator: git commit
-Step 7.5 (every 20 iter) Task(redteam-critic)
+Step 6   Researcher: update vcg.md (counters, candidate→COUNTED promotion)
+Step 7   Researcher: git commit
+Step 7.5 (every 10 iter) Task(redteam-critic)
          → appends "## Critic check @ v<N>" block to AGENT_LOG.md
            auditing 4 axes: cross-VC composition, reward hacking,
            coverage gaps, hypothesis quality drift
-Step 8   Orchestrator: append iteration row to AGENT_LOG.md
-Step 9   Orchestrator: done → /loop schedules next iter
+Step 8   Researcher: append iteration row to AGENT_LOG.md
+Step 9   Researcher: done → /loop schedules next iter
 ```
 
-This is the **default** driver: the `/autoresearch-redteam-discovery`
-skill run one iteration at a time under `/loop`, entirely model-driven.
-Stage 1 discovery can optionally instead be driven by a deterministic
-**Workflow driver** (`plugins/researchers/default/workflows/aha_discovery.js`)
-— batched-parallel and resumable: it fans K independent proposals per
-batch through the same `[hypothesizer → attack-designer → run_attack →
-reflector]` pipeline, then folds the VCG serially at a batch barrier and
-fires the critic every 10 iters. The mechanical bookkeeping above (STOP
-check, VCG snapshot, selection, fold/promotion, commit) runs as
-deterministic MCP tools (`src/autoresearch_redteam/discovery_mcp.py`)
-rather than orchestrator judgment calls; the falsifier protocol,
-promotion gate, and oracle isolation are unchanged either way.
+The `/autoresearch-redteam-discovery` skill runs one iteration at a time
+under `/loop`. The Researcher selects the mode and instance, dispatches
+the four sub-agents, updates the VCG, and promotes counted concepts.
 
 ## Why the multi-agent split
 
@@ -50,10 +41,10 @@ fresh context prevents the failure mode:
 
 | Sub-agent | Why isolated context |
 |---|---|
-| **Hypothesizer** (opus) | Commits a falsifiable hypothesis **before** seeing the attack. Same agent doing both retrofits the hypothesis to match the attack. |
-| **Attack-designer** (opus) | Only sees the hypothesis, not the Hypothesizer's reasoning. Forces concrete framing that *implements* the hypothesis. |
-| **Reflector** (sonnet) | Classification work, not creation. Sonnet 4.6 ≈ 5× cheaper than Opus per call. |
-| **Critic** (opus, every 20 iter) | Fresh-context audit of last 20 iter for reward hacking. The Researcher has no incentive to catch its own cheating; the Critic does. |
+| **Hypothesizer** (inherit) | Commits a falsifiable hypothesis **before** seeing the attack. Same agent doing both retrofits the hypothesis to match the attack. |
+| **Attack-designer** (inherit) | Only sees the hypothesis, not the Hypothesizer's reasoning. Forces concrete framing that *implements* the hypothesis. |
+| **Reflector** (inherit) | Classification work, not creation. Same research-model backbone as the other sub-agents. |
+| **Critic** (inherit, every 10 iter) | Fresh-context audit of last 10 iter for reward hacking. The Researcher has no incentive to catch its own cheating; the Critic does. |
 
 ## Vulnerability Concept Graph (VCG)
 
@@ -122,11 +113,11 @@ at the wall and see what sticks".
 
 ## Stage 1 vs Stage 2
 
-**Stage 1 (search)**: orchestrator + sub-agents iterate on the
+**Stage 1 (search)**: Researcher + sub-agents iterate on the
 scenario's discovery set. Up to 100 iter unless monitor halts earlier.
 Output: `vcg.md` with discovered concepts.
 
-**Stage 2 (held-out eval)**: deterministic, no orchestrator. For each
+**Stage 2 (held-out eval)**: deterministic, no Researcher session. For each
 held-out instance, a separate **Claude Code instantiator** picks the single
 best-matching COUNTED concept from `frozen_concepts.json` and writes
 one concrete attack payload for that instance. Each held-out instance
@@ -144,11 +135,11 @@ aggregate_heldout.py      → leaderboard.json (ASR + diagnostics)
 
 | Component | Where | Model |
 |---|---|---|
-| Orchestrator | `claude --dangerously-skip-permissions` in worktree | Claude Code (Opus 4.7 via Max plan) |
-| Hypothesizer | `.claude/agents/redteam-hypothesizer.md` | Opus |
-| Attack-designer | `.claude/agents/redteam-attack-designer.md` | Opus |
-| Reflector | `.claude/agents/redteam-reflector.md` | Sonnet 4.6 |
-| Critic | `.claude/agents/redteam-critic.md` | Opus |
+| Researcher | `claude --dangerously-skip-permissions` in worktree | Claude Code (Opus 4.7 via Max plan) |
+| Hypothesizer | `.claude/agents/redteam-hypothesizer.md` | inherit (same research model) |
+| Attack-designer | `.claude/agents/redteam-attack-designer.md` | inherit (same research model) |
+| Reflector | `.claude/agents/redteam-reflector.md` | inherit (same research model) |
+| Critic | `.claude/agents/redteam-critic.md` | inherit (same research model) |
 | Monitor sidecar | `autoresearch-redteam-monitor` skill, 2nd claude session | Claude Code |
 | Victim | Docker `ar_<scenario>:latest` (FROM ar_claude_code_base:latest), claude-agent-sdk | any anthropic-compatible endpoint (example: DeepSeek's anthropic namespace) |
 | Judge | host-side OpenAI-compatible call | any OpenAI-compatible endpoint (default: OpenRouter, model `google/gemini-3-flash-preview` to match AHZ paper) |

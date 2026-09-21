@@ -91,7 +91,7 @@ on refusal, would propagate that drift into Stage 2.
 
 ## Promotion artefacts
 
-When a concept is promoted, the orchestrator moves it from
+When a concept is promoted, the Researcher moves it from
 `## Candidate Concepts` to `## Counted Concepts` in `vcg.md` and
 sets `provenance: confirmed`. The Stage 2 `freeze_concepts.py` script
 reads only `## Counted Concepts`.

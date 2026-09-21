@@ -2,7 +2,7 @@
 
 model = "gpt-5.5"   # build model
 
-# Autonomous orchestrator.
+# Autonomous Researcher.
 approval_policy = "never"          # no command approvals
 sandbox_mode = "danger-full-access"  # unsandboxed host commands
 

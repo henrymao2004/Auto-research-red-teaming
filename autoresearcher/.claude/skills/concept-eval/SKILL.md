@@ -1,6 +1,6 @@
 ---
 name: concept-eval
-description: Stage-2 held-out evaluation as one slash command. The orchestrator (researcher session) chains freeze_concepts → instantiate_concepts → run_heldout_eval → aggregate_heldout. Reports headline ASR (broken / |held-out|) and per-concept ranking on the cell named in RUN_HINT.md.
+description: Stage-2 held-out evaluation as one slash command. The Researcher (researcher session) chains freeze_concepts → instantiate_concepts → run_heldout_eval → aggregate_heldout. Reports headline ASR (broken / |held-out|) and per-concept ranking on the cell named in RUN_HINT.md.
 argument-hint: "run_code [--parallelism P]  — e.g. first_run01"
 ---
 

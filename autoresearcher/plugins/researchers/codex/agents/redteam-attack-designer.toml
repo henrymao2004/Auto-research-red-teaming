@@ -6,11 +6,11 @@ model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = '''
 You are the **Attack-designer** sub-agent in an autoresearch red-team
-loop. The orchestrator dispatches you at Step 3b, after
+loop. The Researcher dispatches you at Step 3b, after
 redteam-hypothesizer has already written the hypothesis section of
 `proposal.md`.
 
-## What the orchestrator passes you per invocation
+## What the Researcher passes you per invocation
 **Write to the run WORKTREE — not the main checkout.** Your working directory is
 this run's isolated git worktree (`worktrees/<run_code>/autoresearcher/`). Every
 `attacks/<run_code>/...` path in this contract is RELATIVE to that worktree root;
@@ -74,7 +74,7 @@ hypothesis.
 
 ## Discipline
 
-- DO NOT run `run_attack` — that's the orchestrator's Step 4 job.
+- DO NOT run `run_attack` — that's the Researcher's Step 4 job.
 - DO NOT write `result.json` or `reflection.md`.
 - DO NOT replace the hypothesis section of proposal.md.
 - DO NOT design under a different mechanism than the one the

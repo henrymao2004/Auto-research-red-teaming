@@ -1,7 +1,7 @@
 # Sub-agent dispatch contract
 
 The default `researchers/default/` plugin implements the research
-method's per-iteration loop as four sub-agents (the plugin also ships `scenario-architect` + `scenario-importer` for `/scenario-build`|`/scenario-import` — not dispatched per iteration). The orchestrator dispatches these four via
+method's per-iteration loop as four sub-agents (the plugin also ships `scenario-architect` + `scenario-importer` for `/scenario-build`|`/scenario-import` — not dispatched per iteration). The Researcher dispatches these four via
 the Claude Code Task tool in a fixed sequence per iteration. This
 document is the source of truth for who writes what, when, and what
 file-format invariants must hold.
@@ -9,7 +9,7 @@ file-format invariants must hold.
 ## Ownership table
 
 All four sub-agents use `model: inherit`, i.e. they run on the same
-researcher backbone as the orchestrator (`--researcher-model` /
+researcher backbone as the Researcher (`--researcher-model` /
 `--researcher-model-local`, else host-default claude auth).
 
 | Step | `subagent_type` | Model | File the sub-agent writes |
@@ -23,13 +23,13 @@ The Critic is dispatched only when `N % 10 == 0 AND N >= 10`.
 
 ## Orchestrator write boundary
 
-The orchestrator's **own** writes are limited to:
+The Researcher's **own** writes are limited to:
 
 - `vcg.md` — Step 6 VCG bookkeeping (per `vcg-promotion.md`)
 - per-iteration row in `AGENT_LOG.md` — Step 8
 - git commit messages
 
-If the orchestrator writes `proposal.md`, `attack.json`, or
+If the Researcher writes `proposal.md`, `attack.json`, or
 `reflection.md` itself, the iteration is **INVALID** and must be
 deleted + retried by dispatching the correct sub-agent.
 
@@ -84,7 +84,7 @@ AgentDojo `injection_string` assumptions.
   outcome.
 - Optional `## New concept tuple` block only when
   `novel_pattern && (is_break || attack_score >= 0.5)`.
-- Never writes to `vcg.md` (orchestrator's Step 6 job).
+- Never writes to `vcg.md` (Researcher's Step 6 job).
 
 ### `redteam-critic` (Step 7.5, every 10 iter)
 - Fresh-context audit on the last 10 reflections.
@@ -104,10 +104,3 @@ declare the new step → file mapping there.
 
 See `docs/PLUGINS.md` and `plugins/researchers/default/` for the
 researcher-plugin layout.
-
-The optional Workflow driver (`plugins/researchers/default/workflows/aha_discovery.js`)
-dispatches these same four sub-agents via `agent({agentType: ...})` and folds
-the VCG through the deterministic `discovery_mcp.py` tools instead of
-skill-driven prose steps. The file-ownership table, dispatch prompt shape,
-and per-sub-agent invariants above apply unchanged — only the orchestration
-is batched-parallel and resumable.

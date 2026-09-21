@@ -1,8 +1,8 @@
 # default researcher agent
 
 The default 4-agent roster: Hypothesizer → Attack-Designer → Reflector
-→ (every 10 iter) Critic. This is one **researcher agent** plugin (the
-attack-discovery method). Used by the `autoresearch-redteam` skill.
+→ (every 10 iter) Critic. This is one `--researcher` plugin: the
+sub-agent roster the Researcher dispatches. Used by the discovery skill.
 
 The agents themselves are victim-agent-, victim-model-, and
 scenario-agnostic: all scenario-specific context (attack family blurb,

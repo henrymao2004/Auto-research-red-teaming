@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Transient-failure retry proxy for the researcher backbone.
 
-Sits between the orchestrator `claude` and the upstream Anthropic-format
+Sits between the Researcher `claude` and the upstream Anthropic-format
 endpoint (default: Moon Bridge's OpenRouter ingress at :38442). OpenRouter
 occasionally returns a 502 / drops the stream mid-flight ("502 ... EOF"); the
-Anthropic SDK does NOT retry once a stream has started, so the orchestrator
+Anthropic SDK does NOT retry once a stream has started, so the Researcher
 `/loop` hangs. This proxy makes those transient failures invisible:
 
   claude --(ANTHROPIC_BASE_URL=:38443)--> retry_proxy --> :38442 (moonbridge) --> OpenRouter

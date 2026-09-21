@@ -10,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
-    {name = "Henry Mao"},
+    {name = "Xutao Mao"},
+    {name = "Rui Qian"},
+    {name = "Xiang Zheng"},
+    {name = "Cong Wang"},
 ]
 keywords = ["llm-security", "red-team", "prompt-injection", "agenthazard", "agentdyn", "autoresearch", "claude-code"]
 classifiers = [
@@ -38,7 +41,9 @@ autoresearch-evaluate-concepts = "autoresearch_redteam.evaluate_concepts:main"
 autoresearch-concept-rank = "autoresearch_redteam.concept_rank:main"
 
 [project.urls]
-Repository = "https://github.com/henrymao2004/Auto-research-red-teaming-in-sleep"
+Repository = "https://github.com/henrymao2004/Auto-research-red-teaming"
+Homepage = "https://henrymao2004.github.io/Auto-research-red-teaming/"
+Paper = "https://arxiv.org/abs/2607.11698"
 
 [tool.hatch.metadata]
 # Allow the AgentDyn git dependency.

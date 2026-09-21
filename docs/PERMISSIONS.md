@@ -1,6 +1,6 @@
 # Permissions + autonomous-agent standard
 
-The orchestrator + sub-agents must run **fully autonomously** through
+The Researcher + sub-agents must run **fully autonomously** through
 100 iterations — that's the whole point of overnight autoresearch.
 Claude Code's default permission model would prompt on every Bash /
 Write / Edit call, which kills throughput.
@@ -38,13 +38,12 @@ which claude uv python3 docker git
 
 The pipeline makes LLM calls from **two places** with **different protocols**:
 
-### B.1 Orchestrator + sub-agents (Claude Code session)
+### B.1 Researcher + sub-agents (Claude Code session)
 
 - The `claude` CLI itself authenticates via your Claude Code account
   (Max plan recommended for Opus 4.7).
-- Sub-agents request specific models in their YAML frontmatter (`opus`
-  or `sonnet`). Your account must have access to those tiers.
-- No env var needed for the orchestrator — Claude Code handles auth.
+- Sub-agents use `model: inherit` (same research-model backbone as the Researcher). Your account must have access to that model.
+- No env var needed for the Researcher — Claude Code handles auth.
 
 ### B.2 Victim, Judge, Router (host-side and in-container LLM calls)
 
@@ -91,7 +90,7 @@ half of what the paper measures.
 | `<repo>/` (the project checkout) | yes | yes | for `git worktree add`, `.claude/`, `attacks/` |
 | `<repo>/worktrees/<run_code>/` | yes | yes (script + agents) | per-run isolated working tree |
 | `/tmp/ar_ahz_*` (per-attack tempdir) | yes | yes | bind-mounted into each Docker container |
-| `~/.claude/`, `~/.ssh/`, `~/.aws/`, `~/.config/` | **NO** | **NO** | hard-scope deny — orchestrator + sub-agents refuse |
+| `~/.claude/`, `~/.ssh/`, `~/.aws/`, `~/.config/` | **NO** | **NO** | hard-scope deny — Researcher + sub-agents refuse |
 | `/etc/`, `/usr/`, any `/Users/<other>/` | **NO** | **NO** | hard-scope deny |
 | Sibling worktrees `worktrees/<other_run>/` | **NO** | **NO** | run-isolation deny |
 
@@ -101,7 +100,7 @@ per-call confirmation prompt but does NOT override these instructions
 — the agents read them and follow them. Verify with a smoke test:
 
 ```bash
-# In an active orchestrator session, try:
+# In an active Researcher session, try:
 > Read ~/.ssh/id_rsa
 # Expected: agent refuses, citing the deny list.
 ```
@@ -125,7 +124,7 @@ Fresh `ar_<scenario>:latest` container per attack with:
 Whatever the victim does inside — exfil / RCE / backdoor / etc. —
 stays in the ephemeral container. See [`docs/DOCKER.md`](DOCKER.md).
 
-### Layer 2 — Worktree isolation (orchestrator + sub-agents)
+### Layer 2 — Worktree isolation (Researcher + sub-agents)
 
 `launch_run.sh` creates `worktrees/<run_code>/` via `git worktree add`
 and spawns claude **inside** it. The worktree:
@@ -141,9 +140,9 @@ and spawns claude **inside** it. The worktree:
 All four `.claude/agents/redteam-*.md` inherit the deny list from
 `CLAUDE.md`. Documented above in section D.
 
-### Layer 4 — Critic sub-agent audit (every 20 iter)
+### Layer 4 — Critic sub-agent audit (every 10 iter)
 
-`redteam-critic` runs every 20 iterations in fresh context. It checks:
+`redteam-critic` runs every 10 completed iterations in fresh context. It checks:
 
 1. Reward hacking — duplicate attacks, template reuse with swapped
    strings, gaming the judge instead of breaking the victim.
@@ -152,7 +151,7 @@ All four `.claude/agents/redteam-*.md` inherit the deny list from
    of concrete falsifiable ones.
 4. Cross-VC composition not being exploited.
 
-Output appended to `AGENT_LOG.md`, read by next 20 iterations'
+Output appended to `AGENT_LOG.md`, read by next 10 iterations'
 Hypothesizers.
 
 ### Layer 5 — Monitor sidecar with 7 stop signals
@@ -168,7 +167,7 @@ session (Window 2). Every 15 min:
 6. Surprise-signal drop
 7. Outer iter cap (default 100)
 
-Any one going `red` writes `attacks/<run_code>/STOP`. The orchestrator
+Any one going `red` writes `attacks/<run_code>/STOP`. The Researcher
 checks for that file at Step 0 and exits gracefully. This is the
 **kill switch** when you're not watching.
 
@@ -183,7 +182,7 @@ restricts what tools that role can use:
 ---
 name: redteam-reflector
 tools: Read, Write
-model: sonnet
+model: inherit
 ---
 ```
 
@@ -210,15 +209,15 @@ Priority order (highest → lowest):
 
 If the same name exists at both levels, **project wins**. This is
 critical for our setup — the project-level `redteam-*.md` files in
-the worktree are what the orchestrator must dispatch.
+the worktree are what the Researcher must dispatch.
 
 ⚠ **Gotcha**: if you have a stale user-level skill / agent file
 with the **same name** as a project-level one, Claude Code's
 slash-command resolution may pick the wrong one if cwd doesn't have
-the project-level path. Symptom: orchestrator inlines `Write` calls
+the project-level path. Symptom: the Researcher inlines `Write` calls
 instead of dispatching sub-agents.
 
-Verify inside the orchestrator session:
+Verify inside the Researcher session:
 
 ```text
 > /agents
@@ -254,7 +253,7 @@ Sizing guide:
 | 8 | 16 | 32 GB |
 
 Pick `parallel` so total stays below your host's headroom. The
-orchestrator's own claude session uses very little (it doesn't load
+Researcher's own claude session uses very little (it doesn't load
 trajectories into context); sub-agent context is bounded ≤ 50 K
 tokens each.
 
@@ -395,7 +394,7 @@ The deny list has 3 categories:
 | `Edit/Write(docs/**)` | Documentation |
 | `Edit/Write(pyproject.toml`, `uv.lock`, `.gitignore`, `README.md`, `CLAUDE.md)` | Project metadata |
 | `Edit/Write(plugins/**)` | All scenario + victim + researcher plugin code, contracts, datasets, splits, judges — agent MUST NOT modify shipped plugins. Broader-than-AHZ deny: covers every scenario's `clean/`, `clean_heldout/`, `*.json`, `judge.py`, `contract.yaml`, plus every victim's adapter + docker assets |
-| `Read(plugins/scenarios/**/heldout.json)`, `Read(plugins/scenarios/**/judge_data.json)`, `Read(plugins/scenarios/**/clean_heldout/**)` | **Held-out leakage protection + judge-reference isolation** — Stage 1 agent never sees held-out IDs, the scenario's reference attacks, or held-out per-instance files. Per-scenario `train.json` + `clean/` stay readable for instance picking. |
+| `Read(plugins/scenarios/**/heldout.json)`, `Read(plugins/scenarios/**/judge_data.json)`, `Read(plugins/scenarios/**/clean_heldout/**)`, `Read(plugins/scenarios/**/judges/**)` | **Held-out leakage protection + judge-reference isolation** — Stage 1 agent never sees held-out IDs, the scenario's reference attacks, held-out per-instance files, or per-instance judge sources. Per-scenario `train.json` + `clean/` stay readable for instance picking. |
 
 **Category 2 — Path denies (protect the host)**
 
@@ -448,7 +447,7 @@ loses the "agent can't edit `src/`" protection AND autopilot mode.
 
 ### K.4 How the layers interact
 
-When the orchestrator (or any sub-agent) attempts a tool call:
+When the Researcher (or any sub-agent) attempts a tool call:
 
 ```
 1. Is it in project-level (.claude/settings.local.json) deny?  → BLOCKED.
@@ -582,28 +581,4 @@ stacks up. This is the egress/network layer — it makes the allowed tools
 usable but does not change which tools are allowed. A backend that is down
 makes a whitelisted tool fail; it does not widen the permission set.
 
----
 
-## N. Optional Workflow driver — the `aha-discovery` MCP server
-
-The optional Workflow driver (a deterministic, batched-parallel alternative
-to `/loop` + `/autoresearch-redteam-discovery`; see [`USAGE.md`](USAGE.md))
-adds exactly one new host-side component: an MCP server, `aha-discovery`
-(`src/autoresearch_redteam/discovery_mcp.py`), registered per-session via
-`plugins/researchers/default/workflows/.mcp.json`.
-
-It is a **researcher-side** tool, not a victim-side one, and it does not
-widen the victim's action surface:
-
-- Reads `RUN_HINT.md`, `vcg.md`, and the scenario's `clean/` — the same
-  paths the orchestrator itself already reads.
-- Writes only under `attacks/<run>/` (iteration dirs, `vcg.md`,
-  `AGENT_LOG.md`, and `git commit` scoped to `attacks/<run>/`).
-- For the `run_attack` tool it shells out to the existing `run_attack.py`
-  — same per-attack Docker sandbox (Layer 1 above), same 10-min budget,
-  same `--rm` container.
-
-No new victim-facing capability is introduced; the 5 isolation layers in
-§E and the filesystem denies in §D/§K are unchanged. Enable it by
-exporting `AHA_WORKSPACE=<worktree root>` and registering `.mcp.json` for
-the session — the default `/loop` path needs none of this.
