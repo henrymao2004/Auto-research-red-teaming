@@ -1,46 +1,19 @@
 """Runs inside the codex victim container (``ar_codex:latest``).
 
-Reads the attack spec from **stdin** (piped by the host adapter) and
-writes ``/harness/trajectory.json``. Mirrors the structure of the
-claude_code ``in_container_runner.py::main_async`` but drives the
-``codex exec`` CLI instead of the claude-agent-sdk.
+Reads the attack spec from stdin and writes ``/harness/trajectory.json``,
+driving ``codex exec`` once per user turn (``codex exec resume <thread_id>``
+for later turns). Contract dispatch comes from ``runner_core``.
 
-Two scenario shapes are handled:
+When the scenario declares an ``mcp_tools_module``, a
+``[mcp_servers.scenario_tools]`` STDIO block is added to the codex config;
+``scenario_mcp_stdio.py`` serves the scenario's tools, applies the
+``tool_response_interceptors`` to their output, and writes the
+``post_environment`` the runner attaches for the judge.
 
-- **no-MCP** (agenthazard-style multi-turn user messages, codex's
-  built-in tools): just drive ``codex exec`` per user turn.
-- **MCP + IPI** (agentdyn-style): when the scenario declares an
-  ``mcp_tools_module``, the runner templates a
-  ``[mcp_servers.scenario_tools]`` STDIO block into the codex config and
-  codex spawns ``scenario_mcp_stdio.py``, which re-serves the scenario's
-  tools and applies the ``tool_response_interceptors`` to each tool's
-  output (the codex IPI path — claude_code does this in a PostToolUse
-  hook; codex does it at the MCP server). After the run the runner reads
-  back the server-serialized ``post_environment`` for the judge.
-
-The model-agnostic contract dispatch (spec normalisation, user-turn
-derivation, env hydration, interceptor resolution, trajectory filtering)
-is reused verbatim from ``runner_core`` so this module stays
-codex-specific only.
-
-codex transport (CONFIRMED working against deepseek via OpenRouter):
-
-- ``codex exec --json --skip-git-repo-check
-  --dangerously-bypass-approvals-and-sandbox "<prompt>" < /dev/null``
-  emits JSONL events on stdout:
-    - ``thread.started``   — has ``thread_id``
-    - ``turn.started``
-    - ``item.completed``   — has ``item`` with ``type`` in
-        {``agent_message`` (has ``text``), ``command_execution``,
-         ``mcp_tool_call`` (has ``server``/``tool``/``arguments``/``result``/
-         ``status``), ``reasoning``}
-    - ``turn.completed``   — has ``usage``
-    - ``error`` / ``turn.failed`` on failure
-- Resume a thread for the next user turn:
-  ``codex exec resume <thread_id> --json ... "<next prompt>" < /dev/null``
-
-``$CODEX_HOME`` points at a writable temp dir; we template its
-``config.toml`` with the OpenRouter provider block before the first turn.
+``codex exec --json`` emits JSONL events: ``thread.started`` (``thread_id``),
+``item.completed`` (``agent_message``, ``command_execution``,
+``mcp_tool_call``, ``reasoning``), ``turn.completed`` (``usage``), and
+``error`` / ``turn.failed``.
 """
 from __future__ import annotations
 
@@ -52,7 +25,6 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-# Shared contract dispatch.
 from runner_core import (
     GENERIC_KICKOFF,
     HARNESS,
@@ -67,14 +39,10 @@ DEFAULT_MODEL = "deepseek/deepseek-v4-pro"
 
 
 def _normalise_model(slug: str | None) -> str:
-    """Pass the victim model slug to Moon Bridge verbatim.
+    """Pass the victim model slug to Moon Bridge unchanged.
 
-    Moon Bridge resolves the name against its own config (the ``models:``
-    aliases + each provider's ``offers``), so a bare slug like
-    ``deepseek-v4-pro`` or ``minimax-m2.7`` already routes to the right
-    upstream. We do NOT guess a ``<vendor>/`` prefix — hardcoding one
-    mis-routes every model whose vendor we didn't enumerate (e.g.
-    ``minimax-m2.7`` -> ``deepseek/minimax-m2.7`` -> 400 from DeepSeek).
+    Moon Bridge resolves bare slugs against its own config; adding a
+    ``<vendor>/`` prefix here would mis-route models from other vendors.
     """
     s = (slug or "").strip()
     return s or DEFAULT_MODEL
@@ -90,18 +58,13 @@ def _write_codex_config(
     model: str,
     mcp_server_env: dict[str, str] | None = None,
 ) -> Path:
-    """Template ``$CODEX_HOME/config.toml`` with the OpenRouter provider.
+    """Write ``$CODEX_HOME/config.toml`` for the Moon Bridge Responses endpoint.
 
-    When ``mcp_server_env`` is provided (the scenario declared an
-    ``mcp_tools_module``), a ``[mcp_servers.scenario_tools]`` STDIO block
-    is appended — codex spawns ``scenario_mcp_stdio.py`` and routes the
-    scenario's tools through it (the codex analogue of claude_code's
-    in-process SDK MCP server). Tool-output interceptors are applied
-    inside that server. The OpenRouter API key is read from
-    ``OPENROUTER_API_KEY`` at runtime via ``env_key`` — never in the file.
+    With ``mcp_server_env``, a ``[mcp_servers.scenario_tools]`` STDIO block is
+    appended. The API key is read at runtime via ``env_key`` and is never
+    written to the file.
     """
     codex_home.mkdir(parents=True, exist_ok=True)
-    # Configure the Responses endpoint.
     base_url = os.environ.get(
         "CODEX_RESPONSES_BASE_URL", "http://host.docker.internal:38440/v1")
     key_env = os.environ.get("CODEX_API_KEY_ENV", "MOONBRIDGE_API_KEY")
@@ -145,11 +108,8 @@ def _prepare_scenario_mcp(
 ) -> tuple[dict[str, str], str]:
     """Stage the STDIO MCP server's launch files; return its env + post-env path.
 
-    Writes ``instance`` / ``env_state`` / resolved ``interceptors`` to a
-    private dir under ``$CODEX_HOME`` (NOT a bind mount, so a probing victim
-    can't read its own attack plan) and returns the env-var block codex
-    injects when it spawns ``scenario_mcp_stdio.py`` plus the path that
-    server writes the post-attack environment to.
+    Files go under ``$CODEX_HOME`` rather than a bind mount so a probing
+    victim cannot read its own attack plan.
     """
     mcp_dir = codex_home / "scenario_mcp"
     mcp_dir.mkdir(parents=True, exist_ok=True)
@@ -188,10 +148,8 @@ _CODEX_NONMCP_FEATURES = ["shell_tool", "unified_exec", "browser_use",
 def _codex_disables_for(disallowed_tools: Any) -> list[str]:
     """Map a scenario's `disallowed_tools` to codex `--disable` feature flags.
 
-    Returns the non-MCP feature set when the scenario removes the built-in
-    coding surface (any shell/file tool in `disallowed_tools`); else empty.
-    codex has no per-named-tool removal like claude, so this is feature-grained:
-    `shell_tool` disables the whole shell rather than individual `Bash` etc.
+    codex cannot remove individual tools, so any shell/file tool in
+    `disallowed_tools` disables all non-MCP features.
     """
     if not disallowed_tools:
         return []
@@ -211,15 +169,8 @@ def _run_codex_turn(
 ) -> subprocess.CompletedProcess:
     """Run one ``codex exec`` (or ``codex exec resume``) turn.
 
-    Spec piped via stdin elsewhere; the codex prompt is passed as an argv
-    positional. stdin is closed (``/dev/null``) so codex doesn't block
-    waiting for interactive input.
-
-    ``disable_features`` are codex feature flags turned off via repeated
-    ``--disable`` (e.g. ``shell_tool``). This is the codex analogue of the
-    claude runner's ``disallowed_tools``: when a scenario removes the built-in
-    coding surface (dtagent forces MCP-only), we disable codex's non-MCP tool
-    features so the only tools left are the scenario's ``mcp__*`` servers.
+    stdin is closed so codex does not wait for interactive input.
+    ``disable_features`` are passed as repeated ``--disable`` flags.
     """
     base = [
         "codex", "exec",
@@ -250,10 +201,7 @@ def _run_codex_turn(
 
 
 def _parse_jsonl(stdout: str) -> list[dict[str, Any]]:
-    """Parse codex ``--json`` JSONL stdout into a list of event dicts.
-
-    Non-JSON lines (stray logging) are skipped, not fatal.
-    """
+    """Parse codex ``--json`` JSONL stdout into event dicts, skipping non-JSON lines."""
     events: list[dict[str, Any]] = []
     for line in (stdout or "").splitlines():
         line = line.strip()
@@ -273,11 +221,7 @@ def _event_type(ev: dict[str, Any]) -> str:
 
 
 def _item_of(ev: dict[str, Any]) -> dict[str, Any]:
-    """Extract the ``item`` payload from an ``item.completed`` event.
-
-    Some codex builds nest the item under ``item``; tolerate both the
-    nested and the flattened shape.
-    """
+    """Extract the ``item`` payload from an ``item.completed`` event (nested or flat)."""
     item = ev.get("item")
     if isinstance(item, dict):
         return item
@@ -422,7 +366,6 @@ def main() -> int:
         "error": error,
     }
 
-    # Attach post-run environment.
     if post_env_path:
         try:
             out["post_environment"] = json.loads(Path(post_env_path).read_text())

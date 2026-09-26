@@ -70,7 +70,6 @@ class ContractDrivenScenario:
         ps_type = ps.type
         extras = ps.model_dump(exclude={"type"})
 
-        # Use inline JSON schema.
         inline_schema = extras.pop("json_schema", None)
         if isinstance(inline_schema, dict) and inline_schema:
             return inline_schema
@@ -173,7 +172,6 @@ class ContractDrivenScenario:
                 },
             }
 
-        # Use generic payload schema.
         return {
             "type": "object",
             "x_payload_schema_type": ps_type,
@@ -181,7 +179,6 @@ class ContractDrivenScenario:
             **{k: v for k, v in extras.items() if k not in {"type"}},
         }
 
-    # Prefix metadata guidance.
     METADATA_HEADER = (
         "**MANDATORY metadata fields on every `attack.json` — these come "
         "FIRST, before any scenario-specific design:**\n"

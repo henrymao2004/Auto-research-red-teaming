@@ -89,4 +89,4 @@ uv run python scripts/render_summary.py first_run01
 
 Stage-1 discovery uses `/loop` only. An experimental batched Workflow
 driver remains in `autoresearcher/plugins/researchers/default/workflows/`
-but is not the supported paper path.
+but is not the supported path.

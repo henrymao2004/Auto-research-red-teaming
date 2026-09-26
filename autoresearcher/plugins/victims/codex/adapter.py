@@ -1,24 +1,10 @@
 """Codex victim adapter (Docker-sandboxed).
 
-Mirrors :class:`ClaudeCodeAdapter`'s host-side shape but drives the
-OpenAI ``codex`` CLI inside ``ar_codex:latest`` instead of the
-claude-agent-sdk. Pure victim concerns:
-
-  - spawn the container (``input_spec["docker_image"]`` or the adapter's
-    default ``ar_codex:latest``);
-  - per-attack tempdir split into ``/work`` (agent cwd) + ``/harness``
-    (trajectory output only) — handled by ``victim_harness.run_in_docker``;
-  - pipe the attack spec to the in-container runner via **stdin** so it
-    never lands on a bind-mounted path;
-  - read ``trajectory.json`` back from ``/harness``.
-
-codex talks to the victim model via OpenRouter (``OPENROUTER_API_KEY``).
-The container env carries the OpenRouter key + ``CODEX_HOME`` only (NO
-``ANTHROPIC_*`` — codex does not use them). Scenario MCP tools + IPI
-interceptors (when the contract declares an ``mcp_tools_module``) are
-handled inside the container by the runner's STDIO MCP server; the host
-adapter is unchanged by that — it only spawns the container and reads the
-trajectory back.
+Same host-side shape as :class:`ClaudeCodeAdapter`, but drives the OpenAI
+``codex`` CLI inside ``ar_codex:latest``. The attack spec is piped over
+stdin; scenario MCP tools and interceptors are handled in the container by
+the runner's STDIO MCP server. The container gets the provider key and
+``CODEX_HOME`` only, no ``ANTHROPIC_*`` variables.
 """
 from __future__ import annotations
 
@@ -41,7 +27,6 @@ class CodexAdapter:
 
     name = "codex"
     default_model = DEFAULT_MODEL
-    # Attack families handled by the runner.
     supports_attack_families = (
         "multi_turn",
         "multi_turn_user_prompt_ratchet",
@@ -65,7 +50,6 @@ class CodexAdapter:
         self.cpus = cpus
         self.memory = memory
 
-        # Model endpoint key for the runner config.
         self.api_key = (
             openrouter_api_key
             or os.environ.get("MOONBRIDGE_API_KEY")
@@ -75,21 +59,14 @@ class CodexAdapter:
         )
 
     def run(self, input_spec: dict[str, Any]) -> dict[str, Any]:
-        """Spawn one container; return the parsed trajectory dict.
+        """Spawn one container and return the parsed trajectory dict.
 
-        The codex victim ALWAYS runs ``ar_codex`` (which bakes the codex
-        runner). It must NOT use ``input_spec["docker_image"]`` — that is the
-        scenario's *claude-flavored* image (FROM ar_claude_code_base, baking the
-        claude in_container_runner), which would run the wrong agent. Scenario
-        deps that codex needs (e.g. agentdojo's pip package) are baked into
-        ``ar_codex`` (or a codex-flavored scenario image) rather than taken from
-        the claude scenario image.
+        Always uses ``self.image``: ``input_spec["docker_image"]`` is the
+        scenario's claude-based image and would run the wrong agent.
         """
         image = self.image
         spec_json = json.dumps(input_spec, ensure_ascii=False)
-        # Codex container environment.
         container_env = {
-            # Provider key aliases.
             "MOONBRIDGE_API_KEY": self.api_key,
             "OPENROUTER_API_KEY": self.api_key,
             "CODEX_HOME": "/tmp/codex_home",
@@ -99,7 +76,6 @@ class CodexAdapter:
             _v = os.environ.get(_k)
             if _v:
                 container_env[_k] = _v
-        # Forward the selected provider key.
         _key_env = os.environ.get("CODEX_API_KEY_ENV")
         if _key_env and os.environ.get(_key_env):
             container_env[_key_env] = os.environ[_key_env]
@@ -114,11 +90,7 @@ class CodexAdapter:
 
     @staticmethod
     def _find_plugins_dir() -> Path | None:
-        """Locate the host's ``autoresearcher/plugins`` directory.
-
-        This file lives at ``plugins/victims/codex/adapter.py`` so
-        ``parents[2]`` is the plugins root.
-        """
+        """Locate the host's ``autoresearcher/plugins`` directory."""
         here = Path(__file__).resolve()
-        plugins = here.parents[2]  # plugins root
+        plugins = here.parents[2]
         return plugins if (plugins.name == "plugins" and plugins.is_dir()) else None

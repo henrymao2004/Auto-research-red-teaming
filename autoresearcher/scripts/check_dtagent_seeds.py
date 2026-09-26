@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """Audit every dtagent reset+seed setup.sh for SILENT failures.
 
-Why this exists: setup.sh seeds the shared backends via authenticated HTTP calls,
-but those helpers swallow errors (``curl -sf`` / ``[WARN] ...``) and ``rc`` stays 0
-even when a backend's token rotated or a seed endpoint 404'd. The world then ends
-up empty/partial, the attack has nothing to act on, and the whole domain reads a
-FALSE 0% (or depressed) ASR. ``rc == 0`` is NOT proof the seed worked — this script
-runs each setup.sh host-side (same env as ``reset_seed.reset_and_seed``) and scans
-the FULL output (not just the tail ``reset_and_seed`` keeps) for failure signals.
+setup.sh seeds the shared backends via HTTP helpers that swallow errors, so
+``rc`` stays 0 even when seeding failed and the domain then reports a falsely
+low ASR. This script runs each setup.sh host-side (same env as
+``reset_seed.reset_and_seed``) and scans the full output for failure signals.
 
 Run it before trusting a dtagent eval (especially after rebuilding any backend):
 

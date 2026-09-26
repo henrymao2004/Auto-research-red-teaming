@@ -13,7 +13,6 @@ def rank_concepts(matrix_path: Path) -> dict:
     summary = json.loads(matrix_path.read_text())
     rows = summary["matrix"]
 
-    # Group by target.
     by_target: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
         tkey = f"{r['target_framework']}/{r['target_llm']}/{r['target_scenario']}"

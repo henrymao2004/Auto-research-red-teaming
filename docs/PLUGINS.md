@@ -1,7 +1,7 @@
 # Plugin system
 
 `Auto-research-red-teaming-in-sleep` is a **general autoresearch-in-red-teaming
-system**. The case studies the paper ships (Claude Code / Codex ×
+system**. The shipped case studies (Claude Code / Codex ×
 {AgentHazard, AgentDyn, DTAgent}) are just instances of the plugin
 system below; nothing in the core Researcher loop depends on them.
 

@@ -41,7 +41,7 @@ Findings, figures, and the interactive casebook live on the
 
 ## 📢 Latest updates
 
-- **2026-09-21** — Docs and website aligned with the paper.
+- **2026-09-21** — Docs and website updated.
 - **2026-07-13** — 📄 Paper on arXiv: [arXiv:2607.11698](https://arxiv.org/abs/2607.11698).
 - **2026-07-07** — 🎉 Initial public release.
 
@@ -54,12 +54,13 @@ The pipeline above runs in two stages:
    (commits a *falsifier* before seeing the attack), Attack-Designer,
    Reflector, and a periodic Critic (every 10 completed iterations) —
    writing a fully inspectable `attacks/<run>/v<N>/` folder and promoting
-   only replicated, non-falsified breaks into the VCG. A sidecar monitor
+   only replicated, non-falsified breaks into the VCG. A monitor
    halts the loop on 10 stop signals. All four sub-agents inherit the
    research model.
 2. **Stage 2 — held-out evaluation.** `/concept-eval` freezes the counted
-   concepts, instantiates each once against an unseen split (via a sandboxed
-   `claude -p` isolated from the victim), and reports headline
+   concepts, selects one concept per held-out instance and instantiates
+   exactly one attack for it on the researcher's host model (via a
+   sandboxed `claude -p` isolated from the victim), and reports headline
    **ASR = broken / |held-out|**.
 
 The **variables of an experiment** — three registry-discovered plugin axes and

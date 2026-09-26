@@ -1,7 +1,5 @@
-# AgentHazard scenario image. AHZ runs the agent against host-shell-style
-# tools (Bash, Write, Edit, etc.) already shipped by claude-agent-sdk —
-# no scenario-specific Python deps needed. The base image is responsible
-# for Python, the SDK, and the in-container runner.
+# AgentHazard scenario image. The victim only uses the agent's built-in
+# shell/file tools, so nothing is added on top of the base image.
 FROM ar_claude_code_base:latest
 
 LABEL scenario=agenthazard

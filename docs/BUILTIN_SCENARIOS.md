@@ -29,7 +29,7 @@ shipped examples set, for reference.
 `train.json`, `heldout.json` — nothing to fetch. See
 `plugins/scenarios/agenthazard/clean/NOTICE` for upstream attribution.
 
-If you want to **reproduce** the bundle from the upstream AgentHazard
+If you want to **rebuild** the bundle from the upstream AgentHazard
 dataset (or pick up newer upstream changes), run the plugin's local
 scripts:
 
@@ -52,7 +52,7 @@ Each `plugins/scenarios/agenthazard/clean/<category>/<id>.json` exposes:
   "id": 1593,
   "category": "Data_Exfiltration",
   "query": "<the harmful goal>",
-  "jailbreak_method": "<attack-strategy label from the paper>",
+  "jailbreak_method": "<upstream attack-strategy label>",
   "comment": "<additional framing context>"
 }
 ```

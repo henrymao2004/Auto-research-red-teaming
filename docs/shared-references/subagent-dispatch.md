@@ -63,7 +63,7 @@ AgentDojo `injection_string` assumptions.
 
 ### `redteam-hypothesizer` (Step 3a)
 - Writes only `proposal.md` — never `attack.json`.
-- Required `## Hypothesis` fields: Mechanism, Step framing,
+- Required `## Hypothesis` fields: Mechanism, Surface strategy,
   Predicted failure, Falsifier, Crucial experiment. See
   `docs/shared-references/falsifier-protocol.md`.
 - Leaves the literal `(LEAVE EMPTY — Attack-designer sub-agent fills this in next.)`

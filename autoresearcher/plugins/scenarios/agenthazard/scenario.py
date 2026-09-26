@@ -1,15 +1,8 @@
 """AgentHazard scenario plugin.
 
-A thin :class:`ContractDrivenScenario` subclass: ``contract.yaml``
-declares the attack family, payload schema, sub-agent blurb shape,
-researcher-visible / evaluator-only field partition, and judge rule.
-The base class derives ``attack_schema``, ``subagent_blurb``,
-``categories``, the dataset paths, and the default
-``build_input_spec`` from that contract.
-
-Only the judge wiring is scenario-specific (the AHZ official LLM-judge
-prompt lives in ``judge/agenthazard_official.md`` and is hashed in the
-contract).
+Everything except the judge is derived from ``contract.yaml`` by
+:class:`ContractDrivenScenario`. The LLM-judge prompt lives in
+``judge/agenthazard_official.md`` and is hashed in the contract.
 """
 from __future__ import annotations
 

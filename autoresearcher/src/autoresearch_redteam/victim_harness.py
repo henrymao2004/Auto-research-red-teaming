@@ -99,7 +99,6 @@ def _docker_run(
     if _dbg_name:
         cmd += ["--name", _dbg_name]
     cmd += [
-        # Mount capped work tmpfs.
         "--tmpfs", f"/work:rw,size={work_tmpfs_size},mode=1777",
         "-v", f"{harness_dir}:/harness",
     ]

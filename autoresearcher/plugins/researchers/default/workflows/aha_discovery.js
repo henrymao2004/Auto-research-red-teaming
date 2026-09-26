@@ -1,11 +1,9 @@
-// AHA Stage-1 discovery — OPTIONAL Workflow driver.
+// AHA Stage-1 discovery — optional Workflow driver for batched-parallel,
+// resumable discovery. The /autoresearch-redteam-discovery skill + /loop path
+// remains the default.
 //
-// An ADD, not a replacement: the model-driven /autoresearch-redteam-discovery
-// skill + /loop path is unchanged and remains fully supported. Use this driver
-// only when you want batched-parallel + resumable discovery.
-//
-// Control flow (see docs/shared-references/subagent-dispatch.md + the
-// autoresearch-redteam-discovery SKILL.md for the contracts this mirrors):
+// Control flow (contracts: docs/shared-references/subagent-dispatch.md and the
+// autoresearch-redteam-discovery SKILL.md):
 //   per batch r:  STOP-check -> select K independent proposals (one VCG
 //   snapshot) -> PARALLEL pipeline [hypothesizer -> attack-designer ->
 //   run_attack -> reflector] -> BARRIER -> SERIAL fold into the VCG (promotion

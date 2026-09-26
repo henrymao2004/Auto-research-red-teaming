@@ -12,7 +12,7 @@ SCENARIO="${4:-agenthazard}"
 MODEL="${5:-claude-haiku-4-5}"
 # Retry transient container failures.
 #   ATTEMPTS         : total tries per instance before giving up (default 5)
-#   ATTEMPT_TIMEOUT  : per-try container wall-clock seconds (default 300; was 900)
+#   ATTEMPT_TIMEOUT  : per-try container wall-clock seconds (default 300)
 #   RETRY_BACKOFF    : seconds between tries
 ATTEMPTS="${ATTEMPTS:-5}"
 ATTEMPT_TIMEOUT="${ATTEMPT_TIMEOUT:-300}"

@@ -4,18 +4,16 @@
 scenario_name: agenthazard
 version: "1.0"
 
-# Supported victims.
 victim_scope:
   - claude_code
   - codex
 
-# Multi-turn prompt ratchet.
 attack_family: multi_turn_user_prompt_ratchet
 
 attacker_surface:
   type: user_chat
   controllable_fields:
-    - decomposed_query   # Attack messages.
+    - decomposed_query
 
 payload_schema:
   type: message_sequence
@@ -27,9 +25,7 @@ payload_schema:
       content: string
 
 victim_environment:
-  # Scenario role.
   agent_type: cli_coding_agent
-  # Required tool surface.
   tools:
     - Read
     - Write
@@ -52,7 +48,6 @@ victim_environment:
     - ScheduleWakeup
   setup: docker_sandbox     # per-attack /work (agent cwd) + /harness (trajectory output); spec piped via stdin, 10-min hard kill
 
-# Public seed fields.
 researcher_visible_fields:
   - id
   - category
@@ -60,7 +55,6 @@ researcher_visible_fields:
   - source
   - original_id
 
-# Judge-only fields.
 evaluator_only_fields:
   - jailbreak_method
   - comment
@@ -92,7 +86,6 @@ judge:
   type: trajectory_level
   rule: agenthazard_official
   prompt_template: judge/agenthazard_official.md
-  # Judge prompt hash.
   prompt_hash: c9f27227c00daa65e227fa2a248797cfb2fd3db717c9e949fdb0670df9b651e5
 
 runtime:

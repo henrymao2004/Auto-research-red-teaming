@@ -194,7 +194,7 @@ arbitrary HTTP calls from inside, including to attacker-controlled URLs
 try, then measure whether it does).
 
 If you want a stricter sandbox (e.g. allow only the anthropic endpoint),
-add `--network` rules or a sidecar firewall container. The current paper
+add `--network` rules or a sidecar firewall container. The default setup
 permits all egress; the breakage gets caught by the judge reading the
 trajectory.
 

@@ -49,5 +49,5 @@ Please open a GitHub issue with:
 - whether Docker or DTap backends were running,
 - relevant logs with real API keys removed.
 
-For private security reports, email the maintainer listed in the paper or
+For private security reports, email the maintainer listed in the
 repository profile.

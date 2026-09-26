@@ -1,30 +1,15 @@
-"""Generic STDIO MCP server that exposes a scenario's tools to **codex**.
+"""STDIO MCP server that exposes a scenario's tools to codex.
 
-The claude_code victim hands the scenario's tools to the agent via an
-*in-process* claude-agent-sdk MCP server (``create_sdk_mcp_server``) and
-applies IPI interceptors in a ``PostToolUse`` hook. codex has no such
-hook and cannot host an in-process server — it spawns external MCP
-servers over STDIO (declared as ``[mcp_servers.scenario_tools]`` in
-``config.toml``). This module is that STDIO server.
+codex cannot host an in-process SDK server or a PostToolUse hook, so this
+server imports the scenario's ``mcp_tools_module``, calls
+``build_tools(instance, env_state)`` (the same handlers the claude_code victim
+uses), and applies the ``tool_response_interceptors`` to each tool's output
+inside ``call_tool`` via ``runner_core._apply_interceptor``. After every tool
+call the environment is written to ``SCENARIO_MCP_POST_ENV`` so the runner can
+attach it as ``post_environment``.
 
-It reuses the scenario unchanged: it imports the scenario's
-``mcp_tools_module`` and calls ``build_tools(instance, env_state)`` —
-the SAME closure-bound tool handlers + hydrated environment the
-claude_code victim uses (see ``tools_mcp.build_tools``). The only
-codex-specific delta is the transport (a real STDIO MCP server instead
-of the in-process SDK server) and the **application point of the IPI
-interceptors**: claude_code splices in its hook; here we splice each
-tool's output inside ``call_tool`` — reusing ``runner_core``'s
-``_apply_interceptor`` / ``_tool_name_matches`` verbatim, so the
-``tool_response_interceptors`` contract is identical.
-
-After every tool call we serialize the (mutated) environment to
-``SCENARIO_MCP_POST_ENV`` so the host runner can attach it to the
-trajectory as ``post_environment`` for the upstream-security judge —
-the codex equivalent of claude_code's ``mcp_env.model_dump(...)``.
-
-Launch contract (all via env vars, set by the runner in the
-``[mcp_servers.scenario_tools].env`` block; never bind-mounted):
+Configured through env vars set in the ``[mcp_servers.scenario_tools].env``
+block:
 
     SCENARIO_MCP_MODULE        dotted module, e.g. plugins.scenarios.agentdyn.tools_mcp
     SCENARIO_MCP_INSTANCE      path to instance JSON
@@ -42,12 +27,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Shared interceptor logic.
 from runner_core import _apply_interceptor, _tool_name_matches, safe_model_dump
 
 
 def _log(msg: str) -> None:
-    # Keep stdout for JSON-RPC.
+    # stdout carries JSON-RPC.
     print(f"[scenario-mcp] {msg}", file=sys.stderr, flush=True)
 
 
@@ -63,13 +47,7 @@ def _load_json(env_var: str, default: Any) -> Any:
 
 
 def _resolve_build_tools(module_name: str):
-    """Import the scenario module and return its ``build_tools`` callable.
-
-    ``build_tools(instance, env_state) -> (sdk_tools, env)`` is the
-    drive-layer-agnostic seam (see ``tools_mcp.build_tools``). The plugin
-    dir is bind-mounted at ``/plugins``; ``/`` on ``sys.path`` makes
-    ``plugins.scenarios.<name>.tools_mcp`` resolve.
-    """
+    """Import the scenario module from ``/plugins`` and return its ``build_tools`` callable."""
     if "/" not in sys.path:
         sys.path.insert(0, "/")
     mod = importlib.import_module(module_name)
@@ -87,11 +65,8 @@ def _resolve_build_tools(module_name: str):
 def _tool_input_schema(tool: Any) -> dict[str, Any]:
     """Coerce an SdkMcpTool.input_schema into an MCP JSON-Schema object.
 
-    Scenario tools pass a full pydantic ``model_json_schema()`` dict
-    (an object schema). A bare ``{name: pytype}`` mapping (the simple
-    ``@tool`` form) is wrapped into a permissive object schema since we
-    cannot faithfully translate python types here — the handler revalidates
-    its own args anyway.
+    A bare ``{name: pytype}`` mapping becomes a permissive object schema;
+    the handler validates its own args.
     """
     schema = getattr(tool, "input_schema", None)
     if isinstance(schema, dict) and ("properties" in schema or schema.get("type") == "object"):
@@ -102,10 +77,8 @@ def _tool_input_schema(tool: Any) -> dict[str, Any]:
 def _content_to_blocks(content: Any):
     """Turn the handler's ``content`` list into MCP TextContent blocks.
 
-    Handlers return ``{"content": [{"type": "text", "text": ...}, ...]}``.
-    After an interceptor splice the structure can be an arbitrary
-    list/dict, so non-text items are JSON-serialised into a text block
-    rather than dropped (the model must see the spliced payload).
+    Non-text items (possible after an interceptor splice) are JSON-serialised
+    rather than dropped so the model still sees the spliced payload.
     """
     import mcp.types as types
 

@@ -1,13 +1,10 @@
 # AHA Stage-1 discovery — experimental Workflow driver
 
-The paper and the supported operator path use `/loop` with
+The supported operator path is `/loop` with
 `/autoresearch-redteam-discovery`. This directory is an **experimental**
-batched-parallel driver. It is not required to reproduce the paper, and
-it is not the default.
-
-It is an *add*: the `/loop` path is unchanged. Pick this driver only when
-you want higher throughput (parallel hypotheses per batch), context
-isolation, and resumability.
+batched-parallel driver and is not the default. Pick it only when you want
+higher throughput (parallel hypotheses per batch), context isolation, and
+resumability.
 
 ## What it is
 

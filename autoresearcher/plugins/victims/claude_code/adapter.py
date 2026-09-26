@@ -63,21 +63,13 @@ class ClaudeCodeAdapter:
             )
 
     def run(self, input_spec: dict[str, Any]) -> dict[str, Any]:
-        """Spawn one container; return parsed trajectory dict.
+        """Spawn one container and return the parsed trajectory plus a ``_container`` envelope.
 
-        The returned dict has whatever shape the in-container runner wrote
-        to /harness/trajectory.json plus a `_container` envelope with rc,
-        stderr_tail, container error info.
-
-        The scenario image is selected via ``input_spec["docker_image"]``
-        (``run_attack._build_input_spec`` populates this from
-        ``contract.runtime.docker_image``). If unset / empty, the adapter
-        uses its constructor default (``self.image``, normally
-        ``ar_claude_code_base:latest``).
+        Uses ``input_spec["docker_image"]`` (the scenario's image) when set,
+        else ``self.image``.
         """
         image = input_spec.get("docker_image") or self.image
         spec_json = json.dumps(input_spec, ensure_ascii=False)
-        # Claude Code container environment.
         container_env = {
             "ANTHROPIC_BASE_URL": self.victim_base_url,
             "ANTHROPIC_AUTH_TOKEN": self.victim_auth_token,
@@ -98,13 +90,7 @@ class ClaudeCodeAdapter:
 
     @staticmethod
     def _find_plugins_dir() -> Path | None:
-        """Locate the host's ``autoresearcher/plugins`` directory.
-
-        This file lives at ``autoresearcher/plugins/victims/claude_code/adapter.py``
-        so ``parents[2]`` is the plugins root. We resolve via __file__ rather
-        than cwd so the mount path is stable regardless of where run_attack
-        is launched from.
-        """
+        """Locate ``autoresearcher/plugins`` from ``__file__`` so the mount does not depend on cwd."""
         here = Path(__file__).resolve()
-        plugins = here.parents[2]  # plugins root
+        plugins = here.parents[2]
         return plugins if (plugins.name == "plugins" and plugins.is_dir()) else None

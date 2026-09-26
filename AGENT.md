@@ -216,9 +216,9 @@ Three documents define the binding contracts across iterations:
   the attack is designed; Reflector classifies against the falsifier,
   not the break outcome.
 - [`docs/shared-references/vcg-promotion.md`](docs/shared-references/vcg-promotion.md)
-  — entry condition (`Reflector new-concept tuple ∧ is_break`),
+  — entry condition (`Reflector new-concept tuple ∧ effective_break`),
   Laplace-smoothed confidence formula, COUNTED promotion gate
-  (`n_conf ≥ 3 ∧ conf ≥ 0.6 ∧ ≥ 1 is_break`). VCG is per experiment;
+  (`n_conf ≥ 3 ∧ conf ≥ 0.6 ∧ ≥ 1 effective_break`). VCG is per experiment;
   cross-experiment transfer is post-hoc.
 - [`docs/shared-references/subagent-dispatch.md`](docs/shared-references/subagent-dispatch.md)
   — ownership table (who writes which file at which step), dispatch

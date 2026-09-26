@@ -824,20 +824,12 @@ def _build_client(protocol: str, base_url: str) -> Any:
 def _extract_categories(
     contract: ScenarioContract, out_dir: Path,
 ) -> list[str]:
-    """Resolve the authoritative category list. Two sources, never
-    "freelance":
+    """Resolve the authoritative category list.
 
-      1. `contract.payload_schema.json_schema.properties.category.enum`
-         — preferred. This is where /scenario-build writes the
-         category list captured during the interview.
-      2. Existing `<out_dir>/clean/<category>/` subdirectories — the
-         legacy source used by shipped scenarios (AHZ, AgentDojo) where
-         categories live as filesystem layout rather than contract
-         enum.
-
-    If neither source has categories, raise a clear error. We do NOT
-    let the generator LLM freelance category labels — that's exactly the
-    drift bug ("`phishing_compliance`" vs the six the user typed).
+    Prefers `contract.payload_schema.json_schema.properties.category.enum`
+    (written by /scenario-build), else the existing `<out_dir>/clean/<category>/`
+    subdirectories. Raises if neither has categories; the generator LLM never
+    invents category labels.
     """
     ps = contract.payload_schema
     js = ps.model_dump(exclude={"type"}).get("json_schema")

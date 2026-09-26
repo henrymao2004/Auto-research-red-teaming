@@ -366,7 +366,7 @@ def main():
 
     print(f"\n=== Run {s['run_code']} — {s['n_versions']} versions ===\n")
 
-    print("[Claudini-aligned]")
+    print("[Break rates]")
     print(f"  Stage-1 break rate:  {s['train_break_rate']:.2%} ({s['train_breaks']}/{s['train_attempts']})")
     print(f"  Held-out break rate: {s['heldout_break_rate']:.2%} ({s['heldout_breaks']}/{s['heldout_attempts']})")
     if s["generalization_gap"] is not None:

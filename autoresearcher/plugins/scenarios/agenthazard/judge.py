@@ -1,27 +1,16 @@
-"""AgentHazard-style LLM judge.
+"""LLM judge for AgentHazard trajectories.
 
-Single LLM call per trajectory: feed the harmful goal + full agent trajectory,
-get back {harmful: bool, score: 0-10, reason: str}.
+One LLM call per trajectory: the harmful goal plus the full agent trajectory
+go in, ``{harmful: bool, score: 0-10, reason: str}`` comes out.
 
-Adapted from AgentHazard's run/llm_judge.py (https://github.com/Yunhao-Feng/AgentHazard).
-
-## Endpoint
-
-Talks to **OpenAI-compatible** chat-completions (OpenAI / OpenRouter /
-DeepSeek / Together / Moonshot / local vLLM / sglang / ...) **or** the
-**Anthropic Messages API**, selected by the base URL or
-``JUDGE_PROTOCOL`` env override. Configured via env:
+Uses an OpenAI-compatible chat-completions endpoint or the Anthropic
+Messages API, configured via env:
 
     JUDGE_BASE_URL  (default https://openrouter.ai/api/v1)
     JUDGE_API_KEY   (required at call time)
     JUDGE_MODEL     (default google/gemini-3-flash-preview)
-    JUDGE_PROTOCOL  (optional: ``openai`` | ``anthropic``;
-                     auto-detected from JUDGE_BASE_URL when unset)
-
-Auto-detection: a base URL containing ``anthropic`` is treated as
-Anthropic; everything else is treated as OpenAI-compatible. Set
-``JUDGE_PROTOCOL`` explicitly to override (e.g. when using a proxy
-that doesn't follow the naming pattern).
+    JUDGE_PROTOCOL  (optional: ``openai`` | ``anthropic``; otherwise a base
+                     URL containing ``anthropic`` selects Anthropic)
 """
 from __future__ import annotations
 
@@ -41,13 +30,7 @@ _JUDGE_PROMPT_PATH = _HERE / "judge" / "agenthazard_official.md"
 
 @lru_cache(maxsize=1)
 def _judge_prompt() -> str:
-    """Load the AgentHazard-official judge prompt from disk.
-
-    Path: ``plugins/scenarios/agenthazard/judge/agenthazard_official.md``.
-    Cached after first call (the template never changes within a process).
-    The corresponding ``judge.prompt_hash`` is pinned in ``contract.yaml``
-    so silent prompt edits surface at contract-load time.
-    """
+    """Load the judge prompt template; its hash is pinned in ``contract.yaml``."""
     return _JUDGE_PROMPT_PATH.read_text()
 
 
@@ -106,9 +89,6 @@ def judge_trajectory(
 ) -> dict[str, Any]:
     """Score a single agent trajectory against an AgentHazard instance.
 
-    Judge prompt is the official AgentHazard ``run/llm_judge.py`` prompt
-    verbatim (with the ``comment`` field included).
-
     Args:
         instance: AgentHazard instance dict — ``query``, ``category``,
             ``jailbreak_method``, ``comment`` (all four expected by the prompt).
@@ -118,7 +98,7 @@ def judge_trajectory(
         base_url: judge base URL (overrides ``JUDGE_BASE_URL`` env).
         max_retries: parse retries on bad JSON output.
         detail_logs: optional structured tool-call detail dict (gets rendered
-            into the official-prompt ``Detail Logs`` section).
+            into the prompt's ``Detail Logs`` section).
 
     Returns:
         ``{"harmful": bool, "score": int, "reason": str, "raw": str}``

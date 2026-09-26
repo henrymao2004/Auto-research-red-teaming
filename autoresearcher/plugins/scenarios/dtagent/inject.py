@@ -1,4 +1,4 @@
-"""dtagent INDIRECT injection delivery (host-side, faithful to DTap)."""
+"""dtagent INDIRECT injection delivery (host-side)."""
 from __future__ import annotations
 
 import asyncio

@@ -1,58 +1,12 @@
-"""MCP-server façade exposing upstream AgentDojo tools to claude-agent-sdk.
+"""MCP server exposing AgentDojo suite tools to claude-agent-sdk.
 
-The in-container runner drives the victim by handing it a list of
-``McpSdkServerConfig`` objects via ``ClaudeAgentOptions.mcp_servers``.
-This module turns each upstream :class:`agentdojo.functions_runtime.Function`
-into a claude-agent-sdk ``@tool``-decorated callable, all sharing the
-same hydrated :class:`agentdojo.functions_runtime.TaskEnvironment`
-instance so stateful tools (``send_email`` → append to inbox,
-``create_file`` → append to drive, …) mutate one consistent world for
-the duration of a single attack run.
-
-Public entry point:
-    :func:`build_mcp_server(instance, env_state)`
-
-which returns a ``(McpSdkServerConfig, env)`` tuple. The server is
-plugged into ``ClaudeAgentOptions.mcp_servers``; the ``env`` is the
-hydrated pydantic :class:`agentdojo.functions_runtime.TaskEnvironment`
-that the wrapped tools mutate during the run — i.e. the *post-attack*
-environment once the agent finishes. The runner serializes it
-(``env.model_dump(mode='json')``) into the trajectory so the upstream
-``injection_task.security`` / ``user_task.utility`` judge can run over
-the pre/post environment pair.
-
-Design notes
-------------
-* Upstream's :class:`Function` already carries:
-
-  - ``name``          → MCP tool name (1:1, no prefix needed; the
-    server name namespaces these on the SDK side).
-  - ``description``   → MCP tool description.
-  - ``parameters``    → Pydantic model class. We feed its
-    ``model_json_schema()`` directly to ``@tool``'s ``input_schema``
-    argument — claude-agent-sdk accepts a JSON-Schema dict.
-  - ``dependencies``  → ``{arg_name: Depends(env_attr)}``. The wrapper
-    binds the same ``env`` per call and injects these as kwargs the
-    way upstream's :class:`FunctionsRuntime` does.
-
-* Stateful tools mutate ``env`` by way of pydantic sub-models
-  (Inbox / Calendar / CloudDrive / BankAccount / …). We instantiate
-  ``env`` once per :func:`build_mcp_server` call and capture it in
-  every wrapper closure → every tool call in a run sees & mutates the
-  exact same world. The in-container runner calls
-  :func:`build_mcp_server` once per attack run (per instance), so there
-  is no cross-run state bleed.
-
-* Return values from upstream tools can be:
-  - a Pydantic ``BaseModel`` (e.g. ``Email``),
-  - a list of such,
-  - a dict / str / int / bool / None.
-
-  MCP requires the response ``content`` to be a list of ``{"type":
-  "text", "text": str}``-shaped blocks. We coerce every return value
-  through :func:`_to_text` which uses ``model_dump_json`` for Pydantic
-  objects and ``json.dumps(default=str)`` for everything else (date /
-  datetime / Enum show up in AgentDojo payloads).
+Each :class:`agentdojo.functions_runtime.Function` in the suite becomes a
+claude-agent-sdk ``@tool`` whose input schema is the function's pydantic
+``parameters`` schema. All tools close over one hydrated
+``TaskEnvironment`` per attack run, so stateful tools mutate a single
+consistent world, and that environment is returned so the runner can
+serialise it as ``post_environment`` for the judge. Tool return values are
+coerced to MCP text blocks by :func:`_to_text`.
 """
 from __future__ import annotations
 
@@ -80,18 +34,13 @@ def build_mcp_server(
         env_state: the ``environment_snapshot`` dict (researcher-visible
             keys; pydantic-instantiable into the suite's
             ``environment_type``).
-        benchmark_version: agentdojo benchmark version tag; pinned to
-            the version the dataset was extracted from (see
-            ``scenario.yaml`` for provenance).
+        benchmark_version: agentdojo benchmark version tag the dataset
+            was extracted with.
 
     Returns:
-        A ``(server, env)`` tuple where ``server`` is an
-        ``McpSdkServerConfig`` ready to pass to
-        ``ClaudeAgentOptions.mcp_servers`` and ``env`` is the hydrated
-        pydantic ``suite.environment_type`` instance that the wrapped
-        tools mutate in place. After the agent run, ``env`` is the
-        post-attack environment; the runner serializes it for the
-        upstream security/utility judge.
+        ``(server, env)``: an ``McpSdkServerConfig`` for
+        ``ClaudeAgentOptions.mcp_servers`` and the hydrated environment the
+        tools mutate in place (the post-attack environment after the run).
     """
     from claude_agent_sdk import create_sdk_mcp_server
 
@@ -112,20 +61,10 @@ def build_tools(
     *,
     benchmark_version: str = DEFAULT_BENCHMARK_VERSION,
 ):
-    """Build the wrapped scenario tools + the hydrated env, drive-layer-agnostic.
+    """Return ``(sdk_tools, env)``: the wrapped suite tools and the environment they mutate.
 
-    Returns a ``(sdk_tools, env)`` tuple where ``sdk_tools`` is a list of
-    claude-agent-sdk :class:`SdkMcpTool` instances (each carries
-    ``name`` / ``description`` / ``input_schema`` / ``handler``) and
-    ``env`` is the hydrated pydantic ``suite.environment_type`` that the
-    tools mutate in place (the post-attack environment for the judge).
-
-    :func:`build_mcp_server` wraps these into a claude-SDK in-process
-    server for the claude_code victim. Other victims (e.g. the codex
-    STDIO MCP server) consume the same ``(sdk_tools, env)`` directly:
-    each tool's ``handler`` is the identical closure, so the tool world
-    + post-environment behaviour is shared across victims — only the
-    serving transport differs.
+    :func:`build_mcp_server` serves these in-process for claude_code; the
+    codex STDIO MCP server uses them directly.
     """
     from agentdojo.task_suite.load_suites import get_suite
 
@@ -153,24 +92,13 @@ def build_tools(
 
 
 def _wrap_tool(upstream_t, env):
-    """Wrap one upstream :class:`agentdojo.functions_runtime.Function`
-    as a claude-agent-sdk ``@tool``-decorated async callable.
+    """Wrap one agentdojo ``Function`` as a claude-agent-sdk ``@tool`` async callable.
 
-    The wrapper:
-
-    1. Receives ``args: dict`` from the MCP runtime (already JSON-decoded).
-    2. Validates ``args`` against the upstream tool's pydantic
-       ``parameters`` model → dumps to a plain dict (drops aliases,
-       fills defaults).
-    3. Resolves dependencies (e.g. ``inbox=env.inbox``) from the closed-over
-       ``env`` — mutations through these refs propagate across calls.
-    4. Calls ``upstream_t.run(**args, **env_args)`` and returns its
-       value, wrapped in the MCP content envelope.
-
-    Errors are caught and returned as ``isError=True`` MCP responses
-    rather than raising — matches upstream FunctionsRuntime's
-    "return the exception text as a tool message" semantics, which is
-    what real-world agentdojo trajectories see.
+    Arguments are validated against the function's ``parameters`` model and
+    dependencies (e.g. ``inbox=env.inbox``) are bound from the shared ``env``.
+    Validation and runtime errors are returned as ``isError=True`` tool
+    responses carrying the exception text, the same way agentdojo's
+    ``FunctionsRuntime`` reports them.
     """
     from claude_agent_sdk import tool
 
@@ -212,13 +140,7 @@ def _wrap_tool(upstream_t, env):
 
 
 def _strip_schema_titles(schema: dict[str, Any]) -> None:
-    """Recursively drop ``"title"`` keys from a JSON-Schema dict.
-
-    Pydantic-generated schemas tag every field & nested object with a
-    Pascal-Case title that's mostly noise to the LLM ("Bcc",
-    "Recipients"). Removing them tightens the tool description without
-    changing semantics.
-    """
+    """Recursively drop pydantic's auto-generated ``"title"`` keys, which add noise to the tool schema."""
     if isinstance(schema, dict):
         schema.pop("title", None)
         for v in schema.values():
@@ -229,17 +151,7 @@ def _strip_schema_titles(schema: dict[str, Any]) -> None:
 
 
 def _to_text(value: Any) -> str:
-    """Serialise an upstream tool return value to a text payload.
-
-    Order of preference:
-
-    1. pydantic ``BaseModel`` → ``model_dump_json(indent=2)`` —
-       preserves the schema-stable JSON form upstream uses internally.
-    2. list / dict of pydantic-or-json-native → ``json.dumps`` with
-       a ``default=`` that handles datetime / date / Enum / pydantic.
-    3. native JSON types → ``json.dumps``.
-    4. backup → ``str(value)``.
-    """
+    """Serialise a tool return value to text: pydantic models via ``model_dump_json``, else ``json.dumps``, else ``str``."""
     try:
         from pydantic import BaseModel
     except Exception:  # noqa: BLE001

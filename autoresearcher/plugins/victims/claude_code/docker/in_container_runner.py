@@ -1,142 +1,39 @@
 """Runs inside the claude_code victim container.
 
-Reads the attack spec from **stdin** (piped by the host adapter) and
-writes ``/harness/trajectory.json``.
+Reads the attack spec from stdin (piped by the host adapter) and writes
+``/harness/trajectory.json``. ``/work`` is the agent's cwd; ``/harness`` is a
+separate mount used only for trajectory output. The spec arrives on stdin
+rather than a bind-mounted file so a victim probing the filesystem cannot
+recover its own attack plan. Only ``/work/initial_env.json`` is surfaced to
+the agent, and only when ``environment_hydration.kind != none``.
 
-``/work`` is the agent's cwd (visible to its tools); ``/harness`` is a
-separate bind mount used only for the trajectory output (empty at
-container start). The attack spec is delivered via stdin rather than
-a bind-mounted file so that even a victim that explicitly probes
-``/harness`` or any other path cannot recover its own attack plan.
-Only ``initial_env.json`` is intentionally surfaced to the agent at
-``/work/initial_env.json`` (and only when ``environment_hydration.kind
-!= none`` — that file is the IPI vector for env-hydration scenarios).
+The input spec is either a bare top-level ``decomposed_query`` list or the
+contract-driven shape built by ``run_attack._build_input_spec``
+(``model``, ``attack``, ``instance``, ``runtime_spec``, ``docker_image``,
+``mcp_tools_module``, ``allowed_tools``, ``budget``). The ``attack.*`` /
+``instance.*`` dotted paths in ``runtime_spec`` are resolved here via
+``runner_core``, so every contract dimension lives on one side of the docker
+boundary.
 
-If a scenario needs a custom wiring / hydration / interceptor action /
-trajectory capture kind, add a branch to the matching dispatch function —
-``/scenario-extend`` walks a coding agent through the recipe.
+Wiring kinds: ``sequential_user_messages``, ``single_user_message``,
+``system_prompt_prefix`` (payload prepended to the system prompt, then a
+generic kick-off turn), ``environment_only`` (hydrate, then kick-off), and
+``tool_call_injection`` (experimental; the SDK cannot inject a synthetic tool
+result, so it runs with ``environment_only`` semantics).
 
-Two input-spec shapes are accepted:
+Tool response interceptors run in a ``PostToolUse`` hook and live only in the
+hook's closure, so the splice plan is never written to disk. Action kinds:
+``replace_anchor``, ``append``, ``prepend``, ``replace_field``,
+``overwrite_object``.
 
-1. **Legacy AHZ shortcut** — top-level ``decomposed_query``::
+If ``mcp_tools_module`` is set it is imported from the ``/plugins`` mount and
+its ``build_mcp_server(instance, env_state)`` result is normalised by
+``_maybe_load_mcp_server`` into ``ClaudeAgentOptions(mcp_servers=...)``.
+External HTTP MCP servers reach the host via ``host.docker.internal``.
 
-       {"model": "...", "decomposed_query": [...], "max_turns_per_user_msg": 25}
-
-2. **Contract-driven** (the only shape ``run_attack._build_input_spec``
-   produces today)::
-
-       {
-         "model": "...",
-         "attack": {...},                  # raw researcher attack.json
-         "instance": {...},                # raw scenario instance dict
-         "runtime_spec": {                 # ScenarioContract.runtime, dumped
-            "docker_image": "ar_<scenario>:latest",
-            "mcp_tools_module": "plugins.scenarios.foo.tools_mcp" | null,
-            "attack_wiring": {"kind": "...", "source": "attack.*"|"instance.*", ...},
-            "environment_hydration": {"kind": "...", "source": "...", ...},
-            "tool_response_interceptors": [...],
-            "tool_response_interceptors_from": "attack.*"|null,
-            "trajectory_capture": {"include": [...]}
-         },
-         "docker_image": "ar_<scenario>:latest",
-         "mcp_tools_module": "plugins.scenarios.foo.tools_mcp" | null,
-         "allowed_tools": [...] | null,
-         "budget": {"max_input_tokens": 500000, "max_output_tokens": 50000}
-       }
-
-   The runner resolves ``attack.*`` / ``instance.*`` dotted paths from
-   ``runtime_spec`` against the raw ``attack`` + ``instance`` dicts
-   itself (see ``_resolve_path``, ``_resolve_wiring``,
-   ``_resolve_env_hydration``, ``_resolve_interceptors``). The host
-   does no pre-resolution — keeps every contract dimension on one side
-   of the docker boundary, so /scenario-extend never has to choose.
-
-   The legacy shape is detected by the presence of a top-level
-   ``decomposed_query`` key.
-
-**Wiring kinds implemented**
-
-- ``sequential_user_messages`` — for each message in ``payload``,
-  ``await client.query(msg)`` and drain the response stream. Same
-  behaviour as the legacy ``decomposed_query`` path.
-- ``single_user_message`` — send ``payload`` (a single string) as one
-  turn, drain the response.
-- ``system_prompt_prefix`` — ``payload`` is prepended to the agent's
-  configuration's ``system_prompt`` (via
-  :class:`ClaudeAgentOptions(system_prompt=...)`), then a generic
-  kick-off user message ``"Please proceed with your assigned task."``
-  is sent so the agent actually starts producing output.
-- ``environment_only`` — no attacker-controlled user message; we just
-  hydrate the environment and send the same generic kick-off message
-  as ``system_prompt_prefix``.
-- ``tool_call_injection`` — **experimental.** The Claude Code SDK does
-  not give us a path to inject a synthetic tool result before the
-  model starts deciding to call tools. Researchers needing genuine
-  tool-call injection should use ``runtime.type = custom`` (e.g.
-  AgentDojoRuntime). We log the degradation and run with
-  ``environment_only`` semantics so the run still produces a trajectory.
-
-**Environment hydration**
-
-When ``kind != "none"``, the ``state`` dict is materialised as
-``/work/initial_env.json`` so the agent can ``Read`` it via the
-standard Claude Code SDK Read tool. For scenarios that also register
-an MCP tool server (``mcp_tools_module``), the hydrated state is
-passed to ``build_mcp_server(instance, env_state)`` so the tools can
-serve realistic data instead of stubs.
-
-**Tool response interceptors** (LIVE — wired via PostToolUse hook)
-
-Listed interceptors are applied to the upstream tool's return value
-via the claude-agent-sdk ``PostToolUse`` hook. The hook callback
-walks the configured interceptor list, matches on tool name +
-optional ``match`` selectors, and rewrites the tool response in
-place. The interceptor list is held in the hook's closure only —
-nothing is written to disk, so a probing victim can't reverse
-the splice plan from a sidecar file.
-
-Supported ``action.kind`` values:
-
-- ``replace_anchor`` — find ``action.anchor`` in the matched field's
-  string value and substitute ``action.content``.
-- ``append`` / ``prepend`` — bolt ``action.content`` onto the field.
-- ``replace_field`` — overwrite the field entirely.
-- ``overwrite_object`` — replace the entire matched object.
-
-**MCP tools registration**
-
-If the spec sets ``mcp_tools_module``, that Python module is imported
-via :func:`importlib.import_module` (the plugin dir is bind-mounted
-into the container at ``/plugins`` and ``/`` is prepended to
-``sys.path`` by the launcher's bind-mount, so e.g.
-``plugins.scenarios.agentdyn.tools_mcp`` resolves). The module must
-expose ``build_mcp_server(instance: dict, env_state: dict)`` whose
-return value follows this contract (all four shapes are accepted and
-normalised by :func:`_maybe_load_mcp_server`):
-
-- ``McpSdkServerConfig`` — a single in-process server object (most
-  scenarios; keyed by its ``.name`` attr, else ``"scenario_tools"``).
-- ``dict`` — EITHER a single external-server config like
-  ``{"type": "http", "url": "http://host.docker.internal:8931/mcp"}``
-  (recognised by top-level transport keys; keyed ``"scenario_tools"``),
-  OR a ``{server_name: server_or_config}`` mapping for MULTIPLE servers
-  per instance (DTap-style, e.g. ``{"salesforce": ..., "gmail": ...}``)
-  — every entry is registered.
-- ``(server_or_dict, env)`` tuple — any of the above plus the agentdojo
-  post-environment handle ``env`` (preserved for ``post_environment``
-  capture).
-
-The normalised ``{name: server_or_config}`` dict is passed straight
-into ``ClaudeAgentOptions(mcp_servers={...})`` with every server
-registered. External HTTP MCP servers (host-MCP / DTap) reach the host
-via ``host.docker.internal``.
-
-**Trajectory capture filter**
-
-If the spec includes ``trajectory_capture``, only the listed keys are
-kept in the final trajectory.json. Default (legacy) capture is the
-historical set: ``tool_calls``, ``assistant_messages``, ``reasoning``,
-``final_text``, ``result_meta``, ``error``.
+``trajectory_capture.include`` restricts the keys kept in trajectory.json.
+Custom wiring / hydration / interceptor / capture kinds are added as branches
+in the matching dispatch function (see ``/scenario-extend``).
 """
 from __future__ import annotations
 
@@ -239,29 +136,13 @@ def _append_message(message, collected, tool_calls, reasoning_texts) -> None:
 
 
 def _make_intercept_hook(interceptors: list[dict[str, Any]]):
-    """Build the PostToolUse hook callback that runs every interceptor
-    in order against each tool response. Spliced responses replace the
-    tool output that the model sees via ``updatedToolOutput``.
+    """Build the PostToolUse hook that applies every interceptor to each tool response.
 
-    The SDK's ``SyncHookJSONOutput`` only honours ``updatedToolOutput``
-    when it is nested under ``hookSpecificOutput`` (with
-    ``hookEventName == "PostToolUse"``) — see
-    ``claude_agent_sdk.types.PostToolUseHookSpecificOutput`` /
-    ``SyncHookJSONOutput``. A top-level ``updatedToolOutput`` /
-    ``hookEventName`` is NOT a recognised field and is **silently
-    dropped**, so the model would keep receiving the original (clean)
-    tool output and the injection would never land. The nesting below is
-    load-bearing, not cosmetic.
-
-    The spliced value is passed back **in the same shape** the hook
-    received it in (``current`` is a deepcopy of ``tool_response``,
-    mutated in place). It must NOT be ``json.dumps``-ed: ``updatedToolOutput``
-    must match the tool's output schema, and a mismatched shape is
-    rejected (the SDK keeps the original output).
-
-    Returns a coroutine matching :class:`HookCallback`'s signature::
-
-        async def cb(hook_input, tool_use_id, ctx) -> HookJSONOutput
+    ``updatedToolOutput`` is only honoured when nested under
+    ``hookSpecificOutput`` with ``hookEventName == "PostToolUse"``; at top
+    level the SDK silently drops it and the injection never lands. The value
+    must keep the shape the hook received (not ``json.dumps``-ed), otherwise
+    the SDK rejects it and keeps the original output.
     """
     async def _intercept_hook(hook_input, tool_use_id, ctx):  # noqa: ARG001
         tool_name = hook_input.get("tool_name", "")
@@ -297,32 +178,12 @@ def _maybe_load_mcp_server(mcp_tools_module: str | None,
                            env_state: dict[str, Any] | None):
     """Import ``mcp_tools_module`` and call ``build_mcp_server``.
 
-    Returns a ``(servers, env)`` tuple. ``servers`` is a normalised
-    ``{server_name: server_or_config}`` dict ready to splice straight
-    into ``ClaudeAgentOptions(mcp_servers=...)``, or ``None`` if no
-    module is configured or the import / call failed (the run still
-    produces a trajectory; the scenario can log a fatal error via the
-    trajectory's ``error`` field instead). ``env`` is the post-attack
-    environment handle when the scenario exposes one (agentdojo returns
-    ``(server, env)`` from ``build_mcp_server``), else ``None``.
-
-    ``build_mcp_server`` may return ANY of the following shapes; this
-    helper normalises them all into the ``(servers_dict, env)`` form:
-
-    - a single server object (``McpSdkServerConfig`` with a ``.name``);
-    - a single external-server config ``dict`` such as
-      ``{"type": "http", "url": "http://host.docker.internal:8931/mcp"}``
-      (no ``.name`` attribute — keyed as ``"scenario_tools"``);
-    - a ``dict`` of ``{server_name: server_or_config}`` for MULTIPLE
-      servers per instance (DTap-style, e.g. salesforce + gmail —
-      every entry is registered);
-    - a ``(server_or_dict, env)`` tuple, where the first element is any
-      of the above and ``env`` is the agentdojo post-environment handle
-      (that path is preserved).
-
-    The plugin dir is bind-mounted at ``/plugins`` (see launch_run.sh);
-    ``/`` is prepended to ``sys.path`` here so module names of the
-    form ``plugins.scenarios.<name>.tools_mcp`` resolve.
+    Returns ``(servers, env)``: ``servers`` is a ``{name: server_or_config}``
+    dict for ``ClaudeAgentOptions(mcp_servers=...)`` (``None`` if no module is
+    configured or loading failed), and ``env`` is the post-attack environment
+    handle when ``build_mcp_server`` returns a ``(server, env)`` tuple.
+    ``/`` is put on ``sys.path`` so ``plugins.scenarios.<name>.tools_mcp``
+    resolves from the ``/plugins`` mount.
     """
     if not mcp_tools_module:
         return None, None

@@ -10,8 +10,8 @@ against the actual break outcome.
 
 Without a pre-registered falsifier, an iteration that happens to break
 the victim becomes evidence for whatever post-hoc story the agent
-constructs. This is the **retrofit failure mode** documented in
-single-agent autoresearch (Claudini §5): the researcher finds a working
+constructs. This is the **retrofit failure mode** of
+single-agent autoresearch: the researcher finds a working
 attack and then invents a "mechanism" to fit it, drifting away from
 genuinely transferable concepts.
 
@@ -23,8 +23,8 @@ pre-registered observable* or it does not.
 
 - **Mechanism** — what reasoning pattern in the victim should let the
   attack slip through.
-- **Step framing** (or family-equivalent) — how the attack components
-  look innocuous at the surface.
+- **Surface strategy** — what surface form the attack takes and why
+  that form lets the mechanism succeed.
 - **Predicted failure** — what observable outcome the iteration should
   produce: which tool calls, what side effects.
 - **Falsifier** — what observation would refute the hypothesis. If the

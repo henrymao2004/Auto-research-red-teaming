@@ -85,7 +85,7 @@ Condition 3 is the anti-reward-hacking gate: a concept that
 consistently confirms its hypothesis without ever actually breaking
 the victim is recording a successful *prediction*, not a successful
 *attack* — and that pattern is exactly what the Critic was added to
-catch (Claudini §5 reward-hacking drift). Promoting partial-only
+catch (reward-hacking drift). Promoting partial-only
 concepts, or concepts whose only "breaks" are judge false-positives
 on refusal, would propagate that drift into Stage 2.
 

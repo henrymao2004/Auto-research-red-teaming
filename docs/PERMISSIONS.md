@@ -59,7 +59,7 @@ Three independently-configurable endpoint keys (see
 ⚠ **Key safety note**: `ANTHROPIC_AUTH_TOKEN` is forwarded into the
 victim container. Any attack that runs `env` inside the container will
 see it (this is a real production-relevant finding, captured as
-`VC-0004` in the paper's VCG). Mitigations: scoped tokens, key
+`VC-0004` in the VCG). Mitigations: scoped tokens, key
 rotation, or KMS-proxied endpoints. The judge and generator keys are
 host-only and never reach the container.
 
@@ -79,7 +79,7 @@ The container runs **without** `--network none`. If you want a stricter
 egress whitelist (allow only the anthropic-compat endpoint), add
 `--network` rules or a sidecar firewall. The trade-off: you lose the
 ability to detect "agent tries to POST to attacker URL" which is
-half of what the paper measures.
+half of what the evaluation measures.
 
 ---
 

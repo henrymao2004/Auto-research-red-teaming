@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Aligned the README, docs, and website with the paper.
+- Updated the README, docs, and website.
 - `/loop` is the supported Stage-1 path.
 
 ## v0.1.0 - initial public release

@@ -112,7 +112,7 @@ def _load_environment_snapshot(suite_name: str, suite: Any) -> dict[str, Any]:
 
 
 def _build_pair_records(version: str) -> list[dict[str, Any]]:
-    """Walk the four v1.2.2 suites and emit one record per
+    """Walk ``SUITES`` and emit one record per
     ``(user_task, injection_task)`` pair, sorted by ``(suite, user_task_id,
     injection_task_id)``. Numeric ordering is used for ``user_task_N`` /
     ``injection_task_N`` ids so that 10 sorts after 9 rather than after 1."""

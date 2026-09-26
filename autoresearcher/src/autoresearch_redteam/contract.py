@@ -139,7 +139,7 @@ class ToolEnv(BaseModel):
 
 
 class RuntimeSpec(BaseModel):
-    """Declarative runtime spec — the only mode; extra="allow" so scenarios add custom dimensions via /scenario-extend."""
+    """Declarative runtime spec; extra="allow" so scenarios add custom dimensions via /scenario-extend."""
 
     model_config = ConfigDict(extra="allow")
 
@@ -173,7 +173,7 @@ class ScenarioContract(_Base):
     evaluator_only_fields: list[str] = Field(default_factory=list)
 
     synth_requirements: dict[str, Any] | None = None
-    instance_schema: dict[str, Any] | None = None  # Instance JSON Schema.
+    instance_schema: dict[str, Any] | None = None
 
     success_criterion: SuccessCriterion
     trajectory_observation: TrajectoryObservation

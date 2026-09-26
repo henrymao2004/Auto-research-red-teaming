@@ -1,4 +1,4 @@
-AgentHazard data — bundled here for reproducibility.
+AgentHazard data, bundled here so the scenario runs without a separate download.
 
 Source: https://github.com/Yunhao-Feng/AgentHazard
 Paper:  arXiv:2604.02947 — "AgentHazard: A Benchmark for Evaluating
@@ -28,5 +28,5 @@ How this was produced:
 
 License:
   Inherits the AgentHazard upstream license. See the upstream repo
-  README + LICENSE for terms. Redistributed here for research
-  reproducibility under fair use of a published benchmark.
+  README + LICENSE for terms. Redistributed here for research use
+  under fair use of a published benchmark.

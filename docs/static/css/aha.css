@@ -48,7 +48,7 @@ strong{color:var(--ink)}
 .statstrip .l{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:.35rem}
 @media(max-width:760px){.statstrip{grid-template-columns:repeat(2,1fr)}}
 
-/* ---- paper figures ---- */
+/* ---- figures ---- */
 .pfig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1rem;box-shadow:0 2px 10px rgba(20,40,42,.04);margin:1.5rem auto 0;max-width:62rem}
 .pfig img{display:block;width:100%;height:auto}
 .pfig figcaption{font-size:.82rem;color:var(--dim);margin-top:.7rem;text-align:center;line-height:1.5}

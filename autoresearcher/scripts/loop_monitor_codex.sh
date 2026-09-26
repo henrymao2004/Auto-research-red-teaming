@@ -13,7 +13,7 @@ RUN_CODE=$1
 STOP_FILE="attacks/$RUN_CODE/STOP"
 LOCK_FILE="attacks/$RUN_CODE/.codex_monitor_loop.lock"
 MAX_ITERS=${MAX_ITERS:-200}                # generous outer cap (monitor is cheap)
-CHECK_INTERVAL=${CHECK_INTERVAL:-900}      # 15 min, mirrors claude `/loop 15m`
+CHECK_INTERVAL=${CHECK_INTERVAL:-900}      # 15 min, same cadence as `/loop 15m`
 
 if ! command -v codex > /dev/null 2>&1; then
     echo "ERROR: codex CLI not on PATH." >&2

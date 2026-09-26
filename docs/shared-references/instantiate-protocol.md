@@ -30,8 +30,12 @@ file/exec/web tools disallowed**
 plus `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` in the sandboxed env — keeping host
 auto-memory (`MEMORY.md`) out of the single-shot instantiation context.
 It uses the host Max subscription and needs no API key. Concurrency is the
-`--workers` count. Adapted from
-`redteam-baselines/tmap/tmap_core.py::AttackerLLM` (claude_cli path).
+`--workers` count.
+
+Held-out instantiation uses the same host model as the researcher:
+set `INSTANTIATOR_CLI_MODEL` to the research model of the run being
+evaluated. Claude Code runs default to Claude-Opus-4.8 and Codex runs
+use GPT-5.5.
 
 ## Sandbox white/blacklist (anti-cheat)
 

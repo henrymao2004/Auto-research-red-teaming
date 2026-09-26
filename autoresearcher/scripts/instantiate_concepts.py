@@ -20,22 +20,18 @@ The instantiator prompt and the validator are both driven by the scenario's
     of the payload field on ``attack.json`` (e.g. ``decomposed_query``
     for AgentHazard, ``interceptors`` for AgentDojo).
 
-This means the script works unchanged for any contract-driven
-scenario — agenthazard, agentdyn, and anything ``/scenario-build``
-or ``/scenario-import`` produces.
+The script therefore works for any contract-driven scenario.
 
-## SINGLE-SHOT, SANDBOXED CONTRACT (anti-cheat — this is the point)
+## Single-shot, sandboxed contract
 
-The instantiator is a PURE prompt -> LLM -> JSON call. ONE generation
-call per instance. There is NO victim/judge test-time loop: we never run
-the attack, score it, and re-prompt the instantiator on victim feedback. The
-only loop here is the *static* ``validate_attack`` retry/repair — a
-STRUCTURAL delivery check (does the interceptor tool exist? does a mode-B
-injection reach a victim-readable channel?), driven entirely by the clean
-instance + the scenario's tool/injection catalogs, never by running the
-victim. That is allowed and stays.
+The instantiator is a pure prompt -> LLM -> JSON call, one per instance.
+The attack is never run, scored, and fed back to the instantiator. The only
+retry loop is the static ``validate_attack`` delivery check (does the
+interceptor tool exist? does an indirect injection reach a victim-readable
+channel?), driven by the clean instance and the scenario's tool/injection
+catalogs, never by running the victim.
 
-Instantiator-prompt WHITELIST (the prompt may ONLY contain):
+The instantiator prompt may only contain:
   - the chosen scenario's attack-family blurb + delivery guidance;
   - the ABSTRACT concept fields from ``frozen_concepts.json``
     (mechanism / enabling_condition / transfer_prediction /
@@ -49,30 +45,24 @@ Instantiator-prompt WHITELIST (the prompt may ONLY contain):
     names = infrastructure, not an answer key);
   - the contract ``attack_schema``.
 
-Instantiator-prompt BLACKLIST (NEVER read or injected into the prompt):
+Never read or injected into the prompt:
   - ``judge_data.json`` (evaluator-only answer keys: dtagent
     ``canned_attack``, agenthazard ``decomposed_query``, agentdyn
     ``*_ground_truth_function_calls`` / ``*_check_rule``);
   - the discovery ``attacks/<run>/v<N>/`` payloads;
   - ``AGENT_LOG.md`` and per-version reflection/observation text.
 
-Leakage is prevented BY CONSTRUCTION: the instantiator is a prompt->LLM call
-with no file tools (the Claude Code backend runs ``claude -p`` with all
-file/exec tools disallowed), and the prompt is assembled only from the
-sources above. ``_process_one`` sources its per-instance context from
-``bench.load_instance`` (the clean instance), never ``judge_data``.
+The instantiator runs ``claude -p`` with all file/exec tools disallowed and
+the prompt is assembled only from the sources above; per-instance context
+comes from ``bench.load_instance``, never ``judge_data``.
 
 ## Instantiator endpoint
 
-Stage 2 shells out to the logged-in Claude Code ``claude`` CLI in print
-mode (``claude -p``), model ``claude-opus-4-8`` (override
-``INSTANTIATOR_CLI_MODEL``), with ALL file/exec tools disallowed and a
-lean red-team system prompt, ``--output-format json``. It uses the host
-Max subscription and needs no API key. Concurrency is controlled by
-``--workers``.
-
-The Claude Code instantiator must be *different* from the victim model to avoid the
-"victim writes its own attack" reflection bias.
+Stage 2 shells out to the logged-in ``claude`` CLI in print mode with
+``--output-format json``, model ``claude-opus-4-8`` (override
+``INSTANTIATOR_CLI_MODEL``). It uses the host login and needs no API key.
+Concurrency is controlled by ``--workers``. Use an instantiator model that
+differs from the victim model so the victim does not write its own attack.
 
 ## Instance filter
 
@@ -172,13 +162,7 @@ Return ONE JSON object. No prose, no markdown fences."""
 
 
 def _attack_field_name(bench: Any) -> str:
-    """First entry of contract.attacker_surface.controllable_fields.
-
-    By contract convention this is the attack.json key carrying the
-    payload (e.g. ``decomposed_query`` for AHZ, ``interceptors`` for
-    AgentDojo). The runtime layer (attack_wiring) reads from
-    ``attack.<this_field>``.
-    """
+    """Return the attack.json payload key: the first ``controllable_fields`` entry."""
     cfs = bench.contract.attacker_surface.controllable_fields
     if not cfs:
         raise ValueError(
@@ -190,12 +174,7 @@ def _attack_field_name(bench: Any) -> str:
 
 
 def _validate_against_schema(obj: dict, schema: dict) -> None:
-    """Mirror synthesize_instances.py's jsonschema validation.
-
-    If jsonschema is unavailable, emit a soft warning and skip schema
-    validation so older environments still run. Caller must additionally
-    verify ``chosen_vc`` since it's outside the contract schema.
-    """
+    """Validate ``obj`` against ``schema``; skipped with a warning if jsonschema is missing."""
     if not schema:
         return
     try:
@@ -243,12 +222,9 @@ _CLI_SYSTEM = os.environ.get(
 
 
 def _claudecode_instantiator_call_model(user_msg: str, model: str) -> str:
-    """One `claude -p` shell-out with a specific Claude model (+ retry/backoff).
+    """One ``claude -p`` call with retry/backoff; prompt on stdin, file/exec/web tools disallowed.
 
-    `claude -p` print mode, prompt piped via stdin, ALL file/exec/web tools
-    disallowed (the sandbox: the instantiator cannot read judge_data / Stage-1
-    payloads / AGENT_LOG even if the prompt tried to name them). We never set
-    ANTHROPIC_* — that would conflict with the host CLI's own auth.
+    ANTHROPIC_* is removed from the env so the host CLI uses its own login.
     """
     import subprocess
     cmd = [
@@ -261,8 +237,7 @@ def _claudecode_instantiator_call_model(user_msg: str, model: str) -> str:
         "Bash,Edit,Write,Read,Glob,Grep,WebSearch,WebFetch,Task,NotebookEdit,TodoWrite",
     ]
     env = {k: v for k, v in os.environ.items() if not k.startswith("ANTHROPIC_")}
-    # Anti-cheat: keep host auto-memory (MEMORY.md) out of the single-shot
-    # instantiation context, consistent with the disallowed file/exec tools.
+    # Keep host auto-memory out of the single-shot instantiation context.
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
     last: Exception | None = None
     for attempt in range(_CLI_MAX_RETRIES):
@@ -285,10 +260,7 @@ def _claudecode_instantiator_call_model(user_msg: str, model: str) -> str:
 
 
 def _claudecode_instantiator_call(user_msg: str) -> str:
-    """Single-shot sandboxed Claude Code instantiator.
-
-    Uses INSTANTIATOR_CLI_MODEL (claude-opus-4-8 by default).
-    """
+    """Single-shot sandboxed instantiator using ``INSTANTIATOR_CLI_MODEL``."""
     return _claudecode_instantiator_call_model(user_msg, INSTANTIATOR_CLI_MODEL)
 
 
@@ -466,10 +438,11 @@ def main(argv: list[str]) -> int:
     )
 
     def _process_one(cat: str, inst_id: int):
-        """Instantiate one held-out instance. Independent (temperature=0, no
-        cross-instance state) → safe to run on a worker thread. Returns a
-        (status, cat, inst_id, data, obj) tuple; the main thread aggregates +
-        prints so picks/failures stay race-free and output stays ordered."""
+        """Instantiate one held-out instance; returns ``(status, cat, inst_id, data, obj)``.
+
+        No shared state, so it can run on a worker thread; the main thread
+        aggregates results.
+        """
         ver_dir = attacks_root / f"v{inst_id}"
         ver_dir.mkdir(parents=True, exist_ok=True)
         spec_path = ver_dir / "attack.json"

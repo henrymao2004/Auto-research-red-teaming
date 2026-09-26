@@ -1,14 +1,7 @@
 """Model-agnostic, in-container contract dispatch shared by victim runners.
 
-This module holds the generic contract-spec resolution + interceptor
-splice logic extracted from ``in_container_runner.py`` so that future
-victims (e.g. a codex runner) can reuse it WITHOUT importing the
-claude agent SDK. It deliberately depends only on the stdlib.
-
-The claude-specific drive (ClaudeAgentOptions / ClaudeSDKClient, the
-PostToolUse hook shape, building a trajectory from claude SDK message
-objects) stays in ``in_container_runner.py`` and imports the names
-defined here.
+Contract-spec resolution and interceptor splicing, stdlib only, so runners
+for other agents can use it without importing the claude agent SDK.
 """
 from __future__ import annotations
 
@@ -122,13 +115,7 @@ def _invoke_env_callback(
     attack: dict[str, Any],
     instance: dict[str, Any],
 ) -> dict[str, Any]:
-    """Import + call ``module:func(instance, attack)`` from the bind-mounted plugin tree.
-
-    The plugin dir is bind-mounted at ``/plugins`` (see adapter.py).
-    Adding ``/`` to the front of ``sys.path`` makes
-    ``import plugins.scenarios.<name>.hydrate`` resolve — same mechanism
-    ``_maybe_load_mcp_server`` uses for ``tools_mcp``.
-    """
+    """Import and call ``module:func(instance, attack)`` from the ``/plugins`` mount."""
     if not callback_module:
         raise ValueError(
             "environment_hydration.kind == 'callback' requires "
@@ -307,15 +294,11 @@ def _iter_string_leaves(value: Any):
 
 def _splice_string_leaves(value: Any, kind: str, anchor: Any, content: Any,
                           static_match: Any) -> Any | None:
-    """Apply a string action (replace_anchor / append / prepend) to the string
-    leaves of a *structured* (list/dict) tool response, mutating in place.
+    """Apply replace_anchor / append / prepend to the string leaves of a list/dict tool response.
 
-    MCP / AgentDojo tools routinely return structured output (list of text
-    blocks, message lists, nested dicts) rather than a bare string. Without
-    this, ``replace_anchor`` silently no-ops and ``append`` / ``prepend``
-    clobber the whole structure — so a whole class of interceptors fails to
-    deliver the injection. Returns the (mutated) value if applied, else
-    ``None`` (logged), matching ``_apply_interceptor``'s pass-through contract.
+    MCP tools often return structured output rather than a bare string; this
+    splices into the text leaves instead of replacing the whole structure.
+    Mutates in place and returns the value, or ``None`` if nothing applied.
     """
     leaves = list(_iter_string_leaves(value))
     eligible = [(c, k, s) for (c, k, s) in leaves
@@ -357,15 +340,13 @@ def _splice_string_leaves(value: Any, kind: str, anchor: Any, content: Any,
 
 
 def _apply_interceptor(spec: dict[str, Any], tool_response: Any) -> Any | None:
-    """Apply one interceptor spec, including tool responses that
-    serialise structured results into a JSON text block.
+    """Apply one interceptor spec, falling back to JSON text leaves.
 
-    Scenarios like agentdyn return list/object tool output as a single
-    ``{"type": "text", "text": "<json>"}`` block (see scenarios/agentdyn
-    ``_to_text``). The structured selectors ``object_id`` / ``field`` then have
-    no real objects to navigate, so the splice silently no-ops. When the direct
-    apply fails and the spec uses object_id/field, expand each JSON text leaf
-    into a real structure, retry, and re-serialise the leaf that matched."""
+    Some tools (e.g. agentdyn's ``_to_text``) serialise structured output into a
+    single JSON text block, leaving nothing for ``object_id`` / ``field`` to
+    navigate. If the direct apply fails, each JSON text leaf is parsed, retried,
+    and re-serialised.
+    """
     out = _apply_interceptor_core(spec, tool_response)
     if out is not None:
         return out
@@ -516,15 +497,10 @@ def _apply_interceptor_core(spec: dict[str, Any], tool_response: Any) -> Any | N
 
 
 def _tool_name_matches(spec_tool: Any, actual_tool: str) -> bool:
-    """Match an interceptor's ``tool`` field against the runtime tool name.
+    """Match an interceptor's ``tool`` against the runtime tool name.
 
-    The claude-agent-sdk surfaces MCP tools as ``mcp__<server>__<bare>``
-    (e.g. ``mcp__scenario_tools__read_file``), but attack payloads naturally
-    name the *bare* tool (``read_file``). Accept either form (plus ``"*"``
-    wildcard) so a bare-named interceptor still fires. Without this, the
-    prefixed runtime name never equals the bare spec name and the interceptor
-    silently no-ops — the victim then reads clean tool output and any
-    "robustness" result is an artifact.
+    Runtime MCP names are ``mcp__<server>__<bare>`` while attack payloads
+    usually name the bare tool, so both forms match, plus the ``"*"`` wildcard.
     """
     if not spec_tool:
         return False
@@ -544,14 +520,10 @@ def _normalise_input(spec: dict[str, Any]) -> dict[str, Any]:
         env_hydration, interceptors, trajectory_capture,
         system_prompt_prefix, mcp_tools_module, instance
 
-    Two accepted shapes:
-
-      (a) Legacy AHZ shortcut — ``spec["decomposed_query"]`` is a list
-          of user-turn strings; everything else defaults.
-      (b) Contract-driven — ``spec["runtime_spec"]`` is the serialized
-          ``ScenarioContract.runtime`` block, with ``spec["attack"]``
-          and ``spec["instance"]`` carrying the raw dicts. The runner
-          resolves dotted paths locally — no host-side pre-resolution.
+    Accepts either a top-level ``decomposed_query`` list (everything else
+    defaults) or the contract-driven shape, where ``runtime_spec`` is the
+    serialised ``ScenarioContract.runtime`` and dotted paths are resolved
+    against ``attack`` / ``instance``.
     """
     model = spec["model"]
 
@@ -609,11 +581,7 @@ def _normalise_input(spec: dict[str, Any]) -> dict[str, Any]:
 
 
 def _user_turns_for_wiring(norm: dict[str, Any]) -> list[str]:
-    """Translate wiring kind + payload into the sequence of user
-    messages to send. May be empty (no kick-off needed) only in pure
-    background modes — we don't have any of those, so always at least
-    one message is returned.
-    """
+    """Translate wiring kind + payload into the user messages to send (never empty)."""
     kind = norm["wiring_kind"]
     payload = norm["payload"]
     if kind == "sequential_user_messages":
@@ -643,21 +611,12 @@ def _user_turns_for_wiring(norm: dict[str, Any]) -> list[str]:
 def safe_model_dump(model: Any) -> Any:
     """JSON-safe dump of a pydantic env that never raises on non-serializable leaves.
 
-    Some agentdojo tools stash a Python callable into the environment state
-    during a run (e.g. shopping's account-verification flow leaves a closure on
-    ``shopping_platform`` after ``update_shopping_account_password``). The
-    post-attack ``env.model_dump(mode="json")`` then raises
-    ``PydanticSerializationError: Unable to serialize unknown type: <class
-    'function'>``, the runner uses ``post_environment=None``, and the
-    judge cannot score — a successful break is silently mis-scored as safe
-    (undercounts ASR, and corrupts Stage-2 held-out ASR).
-
-    Strategy: try the fast ``mode="json"`` path; on failure, dump in
-    ``mode="python"`` (keeps objects, doesn't JSON-encode) and round-trip through
-    ``json.dumps`` with a default mapper: callables → ``None`` and any other
-    non-JSON leaf → ``str``. The stripped leaves are transient (closures / OTP
-    callbacks), never the state the upstream security check inspects, and the
-    result re-instantiates cleanly via ``suite.environment_type(**post_state)``.
+    Some agentdojo tools leave a callable in the environment state (e.g. the
+    shopping password-reset flow), which makes ``model_dump(mode="json")``
+    raise and would leave the judge without a post-environment. On failure,
+    dump in python mode and map callables to ``None`` and other non-JSON
+    leaves to ``str``; those leaves are transient and not inspected by the
+    security checks.
     """
     def _json_default(o: Any) -> Any:
         return None if callable(o) else str(o)
@@ -672,13 +631,10 @@ def safe_model_dump(model: Any) -> Any:
 
 
 def _filter_trajectory(out: dict[str, Any], capture: list[str] | None) -> dict[str, Any]:
-    """Apply the trajectory_capture filter from the declarative spec.
+    """Keep only the keys listed in ``trajectory_capture`` (all keys when empty).
 
-    If ``capture`` is None / empty, return the full payload (default).
-    Otherwise keep only the listed keys. ``model_messages`` and
-    ``final_answer`` are accepted as aliases for our internal
-    ``assistant_messages`` and ``final_text`` so the user-facing names
-    in ``contract.yaml`` stay readable.
+    ``model_messages`` and ``final_answer`` alias ``assistant_messages`` and
+    ``final_text``.
     """
     if not capture:
         return out
@@ -688,7 +644,7 @@ def _filter_trajectory(out: dict[str, Any], capture: list[str] | None) -> dict[s
     if "final_answer" in requested:
         requested.add("final_text")
     if "tool_outputs" in requested:
-        # Keep tool outputs container.
+        # Tool outputs are stored inside assistant_messages.
         requested.add("assistant_messages")
     requested.add("error")
     return {k: v for k, v in out.items() if k in requested}
